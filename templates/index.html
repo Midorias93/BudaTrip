@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budapest Bike Routes - Smart City</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .control-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-width: 400px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .control-panel h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: #ecf0f1;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .tab-btn:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #34495e;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .info-box {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .info-box p {
+            margin: 5px 0;
+            color: #34495e;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .checkbox-group {
+            margin: 15px 0;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .route-segment {
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+            background: #f8f9fa;
+        }
+
+        .route-segment.walk {
+            border-left-color: #95a5a6;
+        }
+
+        .route-segment.bike {
+            border-left-color: #27ae60;
+        }
+
+        .small-btn {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <div class="control-panel">
+        <h1>
+            <i class="fas fa-bicycle"></i>
+            Budapest Bike Routes
+        </h1>
+
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('search')">
+                <i class="fas fa-search"></i> Recherche
+            </button>
+            <button class="tab-btn" onclick="switchTab('route')">
+                <i class="fas fa-route"></i> Itinéraire
+            </button>
+            <button class="tab-btn" onclick="switchTab('stations')">
+                <i class="fas fa-map-marker-alt"></i> Stations
+            </button>
+        </div>
+
+        <!-- Onglet Recherche -->
+        <div id="tab-search" class="tab-content active">
+            <div class="input-group">
+                <label><i class="fas fa-map-pin"></i> Rechercher une adresse</label>
+                <input type="text" id="search-address" placeholder="Ex: Szondi u 47, Budapest">
+            </div>
+            <button class="btn btn-primary" onclick="searchAddress()">
+                <i class="fas fa-search"></i> Rechercher
+            </button>
+
+            <button class="btn btn-success small-btn" onclick="getMyLocation()">
+                <i class="fas fa-location-arrow"></i> Ma position
+            </button>
+
+            <div id="search-info" class="info-box" style="display: none;"></div>
+        </div>
+
+        <!-- Onglet Itinéraire -->
+        <div id="tab-route" class="tab-content">
+            <div class="input-group">
+                <label><i class="fas fa-play"></i> Départ</label>
+                <input type="text" id="start-address" placeholder="Adresse de départ">
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-stop"></i> Arrivée</label>
+                <input type="text" id="end-address" placeholder="Adresse d'arrivée">
+            </div>
+
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" id="use-bubi" checked>
+                    <i class="fas fa-bicycle"></i> Utiliser les stations Bubi
+                </label>
+            </div>
+
+            <button class="btn btn-primary" onclick="calculateRoute()">
+                <i class="fas fa-route"></i> Calculer l'itinéraire
+            </button>
+
+            <div id="route-info" class="info-box" style="display: none;"></div>
+        </div>
+
+        <!-- Onglet Stations -->
+        <div id="tab-stations" class="tab-content">
+            <button class="btn btn-success" onclick="showAllStations()">
+                <i class="fas fa-bicycle"></i> Afficher toutes les stations
+            </button>
+
+            <button class="btn btn-warning" onclick="findNearestStation()">
+                <i class="fas fa-location-arrow"></i> Station la plus proche
+            </button>
+
+            <div id="station-info" class="info-box" style="display: none;"></div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Chargement...</p>
+        </div>
+
+        <div class="error-message" id="error-message"></div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // Initialisation de la carte
+        const map = L.map('map').setView([47.4979, 19.0402], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Variables globales
+        let markers = [];
+        let routeLayer = null;
+        let stationsData = null;
+        let startMarker = null;
+        let endMarker = null;
+
+        // Icônes personnalisées
+        const startIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        const endIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        const stationIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        // Fonctions utilitaires
+        function showLoading() {
+            document.getElementById('loading').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('active');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('active');
+            setTimeout(() => {
+                errorDiv.classList.remove('active');
+            }, 5000);
+        }
+
+        function clearMarkers() {
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+        }
+
+        function clearRoute() {
+            if (routeLayer) {
+                map.removeLayer(routeLayer);
+                routeLayer = null;
+            }
+        }
+
+        function switchTab(tabName) {
+            // Désactiver tous les onglets
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Activer l'onglet sélectionné
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            // Nettoyer la carte
+            clearMarkers();
+            clearRoute();
+        }
+
+        // Recherche d'adresse
+        async function searchAddress() {
+            const address = document.getElementById('search-address').value;
+            if (!address) {
+                showError('Veuillez entrer une adresse');
+                return;
+            }
+
+            showLoading();
+            clearMarkers();
+
+            try {
+                const response = await fetch('/api/geocode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ address })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const { latitude, longitude, address: fullAddress } = data;
+
+                    // Centrer la carte
+                    map.setView([latitude, longitude], 16);
+
+                    // Ajouter un marqueur
+                    const marker = L.marker([latitude, longitude])
+                        .addTo(map)
+                        .bindPopup(`<b>${fullAddress}</b>`)
+                        .openPopup();
+                    markers.push(marker);
+
+                    // Afficher les infos
+                    document.getElementById('search-info').style.display = 'block';
+                    document.getElementById('search-info').innerHTML = `
+                        <h3><i class="fas fa-info-circle"></i> Résultat</h3>
+                        <p><strong>Adresse:</strong> ${fullAddress}</p>
+                        <p><strong>Coordonnées:</strong> ${latitude.toFixed(5)}, ${longitude.toFixed(5)}</p>
+                    `;
+                } else {
+                    showError(data.error || 'Adresse non trouvée');
+                }
+            } catch (error) {
+                showError('Erreur lors de la recherche: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Obtenir ma position
+        async function getMyLocation() {
+            showLoading();
+            clearMarkers();
+
+            try {
+                const response = await fetch('/api/my-location');
+                const data = await response.json();
+
+                if (data.success) {
+                    const { latitude, longitude } = data;
+
+                    map.setView([latitude, longitude], 16);
+
+                    const marker = L.marker([latitude, longitude])
+                        .addTo(map)
+                        .bindPopup('<b>Votre position</b>')
+                        .openPopup();
+                    markers.push(marker);
+
+                    document.getElementById('search-info').style.display = 'block';
+                    document.getElementById('search-info').innerHTML = `
+                        <h3><i class="fas fa-location-arrow"></i> Votre position</h3>
+                        <p><strong>Latitude:</strong> ${latitude.toFixed(5)}</p>
+                        <p><strong>Longitude:</strong> ${longitude.toFixed(5)}</p>
+                    `;
+                } else {
+                    showError('Impossible de récupérer votre position');
+                }
+            } catch (error) {
+                showError('Erreur: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Calculer un itinéraire
+        async function calculateRoute() {
+            const startAddress = document.getElementById('start-address').value;
+            const endAddress = document.getElementById('end-address').value;
+            const useBubi = document.getElementById('use-bubi').checked;
+
+            if (!startAddress || !endAddress) {
+                showError('Veuillez renseigner les deux adresses');
+                return;
+            }
+
+            showLoading();
+            clearMarkers();
+            clearRoute();
+
+            try {
+                // Géocoder les adresses
+                const startResponse = await fetch('/api/geocode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address: startAddress })
+                });
+                const startData = await startResponse.json();
+
+                const endResponse = await fetch('/api/geocode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address: endAddress })
+                });
+                const endData = await endResponse.json();
+
+                if (!startData.success || !endData.success) {
+                    showError('Impossible de trouver les adresses');
+                    return;
+                }
+
+                const startCoords = {
+                    lat: startData.latitude,
+                    lon: startData.longitude
+                };
+                const endCoords = {
+                    lat: endData.latitude,
+                    lon: endData.longitude
+                };
+
+                // Marqueurs de départ et arrivée
+                startMarker = L.marker([startCoords.lat, startCoords.lon], { icon: startIcon })
+                    .addTo(map)
+                    .bindPopup('<b>Départ</b>');
+                markers.push(startMarker);
+
+                endMarker = L.marker([endCoords.lat, endCoords.lon], { icon: endIcon })
+                    .addTo(map)
+                    .bindPopup('<b>Arrivée</b>');
+                markers.push(endMarker);
+
+                if (useBubi) {
+                    // Itinéraire avec stations Bubi
+                    const routeResponse = await fetch('/api/route-with-stations', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            start_lat: startCoords.lat,
+                            start_lon: startCoords.lon,
+                            end_lat: endCoords.lat,
+                            end_lon: endCoords.lon
+                        })
+                    });
+                    const routeData = await routeResponse.json();
+
+                    if (routeData.success) {
+                        displayRouteWithStations(routeData);
+                    } else {
+                        showError('Impossible de calculer l\'itinéraire');
+                    }
+                } else {
+                    // Itinéraire direct à vélo
+                    const routeResponse = await fetch('/api/route', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            start_lat: startCoords.lat,
+                            start_lon: startCoords.lon,
+                            end_lat: endCoords.lat,
+                            end_lon: endCoords.lon,
+                            mode: 'bike'
+                        })
+                    });
+                    const routeData = await routeResponse.json();
+
+                    if (routeData.success) {
+                        displaySimpleRoute(routeData.route);
+                    } else {
+                        showError('Impossible de calculer l\'itinéraire');
+                    }
+                }
+
+                // Ajuster la vue
+                const bounds = L.latLngBounds([
+                    [startCoords.lat, startCoords.lon],
+                    [endCoords.lat, endCoords.lon]
+                ]);
+                map.fitBounds(bounds, { padding: [50, 50] });
+
+            } catch (error) {
+                showError('Erreur: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displaySimpleRoute(route) {
+            const coords = route.coordinates.map(coord => [coord[1], coord[0]]);
+
+            routeLayer = L.polyline(coords, {
+                color: '#3498db',
+                weight: 5,
+                opacity: 0.7
+            }).addTo(map);
+
+            const distance = (route.distance / 1000).toFixed(2);
+            const duration = Math.round(route.duration / 60);
+
+            document.getElementById('route-info').style.display = 'block';
+            document.getElementById('route-info').innerHTML = `
+                <h3><i class="fas fa-bicycle"></i> Itinéraire à vélo</h3>
+                <p><strong>Distance:</strong> ${distance} km</p>
+                <p><strong>Durée estimée:</strong> ${duration} minutes</p>
+            `;
+        }
+
+        function displayRouteWithStations(data) {
+            const { start_station, end_station, routes, total_distance, total_duration } = data;
+
+            // Marqueurs des stations
+            if (start_station) {
+                const stationMarker = L.marker([start_station.lat, start_station.lon], { icon: stationIcon })
+                    .addTo(map)
+                    .bindPopup(`<b>Station de départ</b><br>${start_station.name}`);
+                markers.push(stationMarker);
+            }
+
+            if (end_station) {
+                const stationMarker = L.marker([end_station.lat, end_station.lon], { icon: stationIcon })
+                    .addTo(map)
+                    .bindPopup(`<b>Station d'arrivée</b><br>${end_station.name}`);
+                markers.push(stationMarker);
+            }
+
+            // Afficher les segments
+            if (routes.walk_to_start) {
+                const coords = routes.walk_to_start.coordinates.map(c => [c[1], c[0]]);
+                L.polyline(coords, { color: '#95a5a6', weight: 4, opacity: 0.7, dashArray: '5, 10' }).addTo(map);
+            }
+
+            if (routes.bike) {
+                const coords = routes.bike.coordinates.map(c => [c[1], c[0]]);
+                routeLayer = L.polyline(coords, { color: '#27ae60', weight: 5, opacity: 0.8 }).addTo(map);
+            }
+
+            if (routes.walk_from_end) {
+                const coords = routes.walk_from_end.coordinates.map(c => [c[1], c[0]]);
+                L.polyline(coords, { color: '#95a5a6', weight: 4, opacity: 0.7, dashArray: '5, 10' }).addTo(map);
+            }
+
+            // Afficher les infos
+            const distance = (total_distance / 1000).toFixed(2);
+            const duration = Math.round(total_duration / 60);
+
+            document.getElementById('route-info').style.display = 'block';
+            document.getElementById('route-info').innerHTML = `
+                <h3><i class="fas fa-route"></i> Itinéraire avec Bubi</h3>
+
+                <div class="route-segment walk">
+                    <strong>🚶 Marche jusqu'à la station</strong><br>
+                    ${start_station.name}<br>
+                    ${(start_station.distance).toFixed(2)} km
+                </div>
+
+                <div class="route-segment bike">
+                    <strong>🚴 Trajet à vélo</strong><br>
+                    ${start_station.name} → ${end_station.name}<br>
+                    ${(routes.bike.distance / 1000).toFixed(2)} km
+                </div>
+
+                <div class="route-segment walk">
+                    <strong>🚶 Marche depuis la station</strong><br>
+                    ${end_station.name}<br>
+                    ${(end_station.distance).toFixed(2)} km
+                </div>
+
+                <p><strong>Distance totale:</strong> ${distance} km</p>
+                <p><strong>Durée totale estimée:</strong> ${duration} minutes</p>
+            `;
+        }
+
+        // Afficher toutes les stations
+        async function showAllStations() {
+            showLoading();
+            clearMarkers();
+
+            try {
+                const response = await fetch('/api/stations');
+                const data = await response.json();
+
+                if (data.success) {
+                    stationsData = data.stations;
+
+                    data.stations.forEach(station => {
+                        const marker = L.marker([station.lat, station.lon], { icon: stationIcon })
+                            .addTo(map)
+                            .bindPopup(`<b>${station.name}</b>`);
+                        markers.push(marker);
+                    });
+
+                    document.getElementById('station-info').style.display = 'block';
+                    document.getElementById('station-info').innerHTML = `
+                        <h3><i class="fas fa-bicycle"></i> Stations Bubi</h3>
+                        <p><strong>Nombre de stations:</strong> ${data.stations.length}</p>
+                    `;
+
+                    // Ajuster la vue pour montrer toutes les stations
+                    const bounds = L.latLngBounds(data.stations.map(s => [s.lat, s.lon]));
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                } else {
+                    showError('Impossible de charger les stations');
+                }
+            } catch (error) {
+                showError('Erreur: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Trouver la station la plus proche
+        async function findNearestStation() {
+            showLoading();
+            clearMarkers();
+
+            try {
+                // D'abord obtenir la position
+                const locationResponse = await fetch('/api/my-location');
+                const locationData = await locationResponse.json();
+
+                if (!locationData.success) {
+                    showError('Impossible de récupérer votre position');
+                    return;
+                }
+
+                const { latitude, longitude } = locationData;
+
+                // Marqueur de position
+                const posMarker = L.marker([latitude, longitude])
+                    .addTo(map)
+                    .bindPopup('<b>Votre position</b>');
+                markers.push(posMarker);
+
+                // Trouver la station la plus proche
+                const stationResponse = await fetch('/api/nearest-station', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lat: latitude, lon: longitude })
+                });
+                const stationData = await stationResponse.json();
+
+                if (stationData.success) {
+                    const station = stationData.station;
+
+                    const stationMarker = L.marker([station.lat, station.lon], { icon: stationIcon })
+                        .addTo(map)
+                        .bindPopup(`<b>${station.name}</b><br>Distance: ${station.distance} km`)
+                        .openPopup();
+                    markers.push(stationMarker);
+
+                    // Tracer une ligne
+                    L.polyline([
+                        [latitude, longitude],
+                        [station.lat, station.lon]
+                    ], {
+                        color: '#e74c3c',
+                        weight: 3,
+                        opacity: 0.7,
+                        dashArray: '10, 10'
+                    }).addTo(map);
+
+                    document.getElementById('station-info').style.display = 'block';
+                    document.getElementById('station-info').innerHTML = `
+                        <h3><i class="fas fa-map-marker-alt"></i> Station la plus proche</h3>
+                        <p><strong>Nom:</strong> ${station.name}</p>
+                        <p><strong>Distance:</strong> ${station.distance} km</p>
+                    `;
+
+                    // Ajuster la vue
+                    const bounds = L.latLngBounds([
+                        [latitude, longitude],
+                        [station.lat, station.lon]
+                    ]);
+                    map.fitBounds(bounds, { padding: [100, 100] });
+                } else {
+                    showError('Aucune station trouvée');
+                }
+            } catch (error) {
+                showError('Erreur: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Gestionnaires d'événements pour Enter
+        document.getElementById('search-address').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchAddress();
+        });
+
+        document.getElementById('start-address').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') document.getElementById('end-address').focus();
+        });
+
+        document.getElementById('end-address').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') calculateRoute();
+        });
+    </script>
+</body>
+</html>
