@@ -1,11 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 import Location
 import Itinerary
-import folium
-import json
 
 app = Flask(__name__)
 
+print("Dossiers static:", app.static_folder)
 
 @app.route('/')
 def index():
@@ -14,7 +13,7 @@ def index():
 
 @app.route('/api/my-location', methods=['GET'])
 def my_location():
-    """Récupère la position de l'utilisateur"""
+    """Get the user's current location"""
     try:
         coords = Location.get_my_coordinates()
         return jsonify({
@@ -24,6 +23,13 @@ def my_location():
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/test-static')
+def test_static():
+    import os
+    static_path = os.path.join(app.root_path, 'static', 'css', 'style.css')
+    exists = os.path.exists(static_path)
+    return f"Fichier existe: {exists}<br>Chemin: {static_path}"
 
 
 @app.route('/api/stations', methods=['GET'])
