@@ -22,9 +22,9 @@ def get_route(start_coords, end_coords, mode='cycling'):
                 'steps': route['legs'][0]['steps']
             }
         else:
-            print(f"Erreur de routage: {data['code']}")
+            print(f"Error of routing: {data['code']}")
             return None
 
     except Exception as e:
-        print(f"Erreur lors de la récupération de l'itinéraire: {e}")
+        print(f"Error while curling the itinerary: {e}")
         return None

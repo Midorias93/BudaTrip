@@ -1,14 +1,12 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budapest Bike Routes - Smart City</title>
 
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -32,9 +30,12 @@
             <button class="tab-btn" onclick="switchTab('stations')">
                 <i class="fas fa-map-marker-alt"></i> Stations
             </button>
+            <button class="tab-btn" onclick="switchTab('weather')">
+                <i class="fas fa-map-marker-alt"></i> Weather
+            </button>
         </div>
 
-        <!-- Onglet Recherche -->
+        <!-- Research -->
         <div id="tab-search" class="tab-content active">
             <div class="input-group">
                 <label><i class="fas fa-map-pin"></i> Rechercher une adresse</label>
@@ -51,7 +52,7 @@
             <div id="search-info" class="info-box" style="display: none;"></div>
         </div>
 
-        <!-- Onglet Itinéraire -->
+        <!-- Itinerary -->
         <div id="tab-route" class="tab-content">
             <div class="input-group">
                 <label><i class="fas fa-play"></i> Départ</label>
@@ -77,7 +78,7 @@
             <div id="route-info" class="info-box" style="display: none;"></div>
         </div>
 
-        <!-- Onglet Stations -->
+        <!-- Stations -->
         <div id="tab-stations" class="tab-content">
             <button class="btn btn-success" onclick="showAllStations()">
                 <i class="fas fa-bicycle"></i> Afficher toutes les stations
@@ -90,18 +91,25 @@
             <div id="station-info" class="info-box" style="display: none;"></div>
         </div>
 
+        <!-- Weather -->
+        <div id="tab-weather" class="tab-content">
+            <button class="btn btn-success" onclick="showAllWeather()">Meteo</button>
+            <div id="weather-info" class="info-box" style="display: none;"></div>
+        </div>
+
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>Chargement...</p>
+            <p>loading...</p>
         </div>
 
         <div class="error-message" id="error-message"></div>
+
+
     </div>
 
-    <!-- Leaflet JS -->
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- VOTRE SCRIPT EXTERNE -->
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
 </body>
 </html>

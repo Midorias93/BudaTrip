@@ -2,6 +2,8 @@ import requests
 from geopy.geocoders import Nominatim
 from enum import Enum
 import json
+from math import radians, sin, cos, sqrt, atan2
+
 
 class INFO(Enum):
     NONE = 0
@@ -52,35 +54,21 @@ def bubi_location():
 
     return Stations
 
+def haversine_distance(coord1, coord2):
+    R = 6371
+
+    lat1, lon1 = radians(coord1[0]), radians(coord1[1])
+    lat2, lon2 = radians(coord2[0]), radians(coord2[1])
+
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    return R * c
 
 def find_nearest_station(coordinates, stations):
-    """
-    Trouve la station Bubi la plus proche d'un point donné
-
-    Args:
-        coordinates: tuple (latitude, longitude)
-        stations: dict des stations Bubi
-
-    Returns:
-        tuple (nom_station, coordonnées_station, distance)
-    """
-    from math import radians, sin, cos, sqrt, atan2
-
-    def haversine_distance(coord1, coord2):
-        """Calcule la distance entre deux points en km"""
-        R = 6371  # Rayon de la Terre en km
-
-        lat1, lon1 = radians(coord1[0]), radians(coord1[1])
-        lat2, lon2 = radians(coord2[0]), radians(coord2[1])
-
-        dlat = lat2 - lat1
-        dlon = lon2 - lon1
-
-        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-        c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-        return R * c
-
     nearest = None
     min_distance = float('inf')
 
@@ -96,27 +84,22 @@ def find_nearest_station(coordinates, stations):
 
 
 def get_coordinates(address):
-    """
-    Récupère les coordonnées GPS d'une adresse
-    """
-    # Créer un géocodeur (user_agent est obligatoire)
     geolocator = Nominatim(user_agent="mon_application")
 
     try:
-        # Géocoder l'adresse
         location = geolocator.geocode(address)
 
         if location:
             return {
-                "adresse": location.address,
+                "address": location.address,
                 "latitude": location.latitude,
                 "longitude": location.longitude
             }
         else:
-            return "Adresse non trouvée"
+            return "Address not found"
 
     except Exception as e:
-        return f"Erreur: {e}"
+        return f"Error: {e}"
 
 
 

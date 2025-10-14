@@ -18,7 +18,7 @@ body {
 .control-panel {
     position: absolute;
     top: 20px;
-    left: 20px;
+    right: 20px;
     background: white;
     padding: 20px;
     border-radius: 10px;
@@ -320,7 +320,6 @@ body {
     }
 }
 
-/* Animation d'apparition */
 @keyframes fadeIn {
     from {
         opacity: 0;
