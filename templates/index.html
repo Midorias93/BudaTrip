@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budapest Bike Routes - Smart City</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div id="map"></div>
+
+    <div class="control-panel">
+        <h1>
+            <i class="fas fa-bicycle"></i>
+            Budapest Bike Routes
+        </h1>
+
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('search')">
+                <i class="fas fa-search"></i> Recherche
+            </button>
+            <button class="tab-btn" onclick="switchTab('route')">
+                <i class="fas fa-route"></i> Itinéraire
+            </button>
+            <button class="tab-btn" onclick="switchTab('stations')">
+                <i class="fas fa-map-marker-alt"></i> Stations
+            </button>
+        </div>
+
+        <!-- Onglet Recherche -->
+        <div id="tab-search" class="tab-content active">
+            <div class="input-group">
+                <label><i class="fas fa-map-pin"></i> Rechercher une adresse</label>
+                <input type="text" id="search-address" placeholder="Ex: Szondi u 47, Budapest">
+            </div>
+            <button class="btn btn-primary" onclick="searchAddress()">
+                <i class="fas fa-search"></i> Rechercher
+            </button>
+
+            <button class="btn btn-success small-btn" onclick="getMyLocation()">
+                <i class="fas fa-location-arrow"></i> Ma position
+            </button>
+
+            <div id="search-info" class="info-box" style="display: none;"></div>
+        </div>
+
+        <!-- Onglet Itinéraire -->
+        <div id="tab-route" class="tab-content">
+            <div class="input-group">
+                <label><i class="fas fa-play"></i> Départ</label>
+                <input type="text" id="start-address" placeholder="Adresse de départ">
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-stop"></i> Arrivée</label>
+                <input type="text" id="end-address" placeholder="Adresse d'arrivée">
+            </div>
+
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" id="use-bubi" checked>
+                    <i class="fas fa-bicycle"></i> Utiliser les stations Bubi
+                </label>
+            </div>
+
+            <button class="btn btn-primary" onclick="calculateRoute()">
+                <i class="fas fa-route"></i> Calculer l'itinéraire
+            </button>
+
+            <div id="route-info" class="info-box" style="display: none;"></div>
+        </div>
+
+        <!-- Onglet Stations -->
+        <div id="tab-stations" class="tab-content">
+            <button class="btn btn-success" onclick="showAllStations()">
+                <i class="fas fa-bicycle"></i> Afficher toutes les stations
+            </button>
+
+            <button class="btn btn-warning" onclick="findNearestStation()">
+                <i class="fas fa-location-arrow"></i> Station la plus proche
+            </button>
+
+            <div id="station-info" class="info-box" style="display: none;"></div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Chargement...</p>
+        </div>
+
+        <div class="error-message" id="error-message"></div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- VOTRE SCRIPT EXTERNE -->
+    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+</body>
+</html>
