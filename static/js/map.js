@@ -1,7 +1,3 @@
-// ============================================
-// INITIALISATION DE LA CARTE
-// ============================================
-
 const map = L.map('map').setView([47.4979, 19.0402], 13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -9,7 +5,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // ============================================
-// CENTRER SUR LA POSITION ACTUELLE (VIA BACKEND)
+// Center the map on user's location if available
 // ============================================
 
 async function initializeUserPosition() {
@@ -22,26 +18,24 @@ async function initializeUserPosition() {
         if (data.success) {
             const { latitude, longitude } = data;
 
-            // Centrer la carte
             map.setView([latitude, longitude], 15);
 
             console.log(`Position trouvée: ${latitude}, ${longitude}`);
         } else {
-            console.warn('Impossible de récupérer la position, utilisation de Budapest par défaut');
+            console.warn('Impossible to get user location, defaulting to Budapest');
         }
     } catch (error) {
-        console.error('Erreur lors de la récupération de la position:', error);
-        showError('Position non disponible, utilisation de Budapest');
+        console.error('Error while get position', error);
+        showError('Position not found, defaulting to Budapest');
     } finally {
         hideLoading();
     }
 }
 
-// Appeler la fonction au chargement
 initializeUserPosition();
 
 // ============================================
-// VARIABLES GLOBALES
+// GLOBAL VARIABLES
 // ============================================
 
 let markers = [];
@@ -51,7 +45,7 @@ let startMarker = null;
 let endMarker = null;
 
 // ============================================
-// ICÔNES PERSONNALISÉES
+// CUSTOM ICONS
 // ============================================
 
 const startIcon = L.icon({
@@ -82,7 +76,7 @@ const stationIcon = L.icon({
 });
 
 // ============================================
-// FONCTIONS UTILITAIRES
+// USEFULLY FUNCTIONS
 // ============================================
 
 function showLoading() {
@@ -115,11 +109,31 @@ function clearRoute() {
 }
 
 // ============================================
-// GESTION DES ONGLETS
+// ONGLETS
 // ============================================
 
+function switchTabLocomotion(tabName) {
+    document.querySelectorAll('.tab-btn-locomotion').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-content-locomotion').forEach(content => {
+        content.classList.remove('active');
+    });
+
+    event.target.classList.add('active');
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+
+    clearMarkers();
+    clearRoute();
+
+    // Check for rain when switching to bike tab
+    if (tabName === 'bike') {
+        checkRainAndShowAlert();
+    }
+}
+
+
 function switchTab(tabName) {
-    // Désactiver tous les onglets
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
@@ -127,23 +141,21 @@ function switchTab(tabName) {
         content.classList.remove('active');
     });
 
-    // Activer l'onglet sélectionné
     event.target.classList.add('active');
     document.getElementById(`tab-${tabName}`).classList.add('active');
 
-    // Nettoyer la carte
     clearMarkers();
     clearRoute();
 }
 
 // ============================================
-// RECHERCHE D'ADRESSE
+// SEARCH ADDRESS
 // ============================================
 
 async function searchAddress() {
-    const address = document.getElementById('search-address').value;
+    const address = document.getElementById('quick-search-input').value;
     if (!address) {
-        showError('Veuillez entrer une adresse');
+        showError('Please enter an address');
         return;
     }
 
@@ -164,35 +176,26 @@ async function searchAddress() {
         if (data.success) {
             const { latitude, longitude, address: fullAddress } = data;
 
-            // Centrer la carte
             map.setView([latitude, longitude], 16);
 
-            // Ajouter un marqueur
             const marker = L.marker([latitude, longitude])
                 .addTo(map)
                 .bindPopup(`<b>${fullAddress}</b>`)
                 .openPopup();
             markers.push(marker);
 
-            // Afficher les infos
-            document.getElementById('search-info').style.display = 'block';
-            document.getElementById('search-info').innerHTML = `
-                <h3><i class="fas fa-info-circle"></i> Résultat</h3>
-                <p><strong>Adresse:</strong> ${fullAddress}</p>
-                <p><strong>Coordonnées:</strong> ${latitude.toFixed(5)}, ${longitude.toFixed(5)}</p>
-            `;
         } else {
-            showError(data.error || 'Adresse non trouvée');
+            showError(data.error || 'Adress not found');
         }
     } catch (error) {
-        showError('Erreur lors de la recherche: ' + error.message);
+        showError('Error while searching ' + error.message);
     } finally {
         hideLoading();
     }
 }
 
 // ============================================
-// OBTENIR MA POSITION
+// GET MY LOCATION
 // ============================================
 
 async function getMyLocation() {
@@ -210,28 +213,21 @@ async function getMyLocation() {
 
             const marker = L.marker([latitude, longitude])
                 .addTo(map)
-                .bindPopup('<b>Votre position</b>')
+                .bindPopup('<b>Your Position</b>')
                 .openPopup();
             markers.push(marker);
-
-            document.getElementById('search-info').style.display = 'block';
-            document.getElementById('search-info').innerHTML = `
-                <h3><i class="fas fa-location-arrow"></i> Votre position</h3>
-                <p><strong>Latitude:</strong> ${latitude.toFixed(5)}</p>
-                <p><strong>Longitude:</strong> ${longitude.toFixed(5)}</p>
-            `;
         } else {
-            showError('Impossible de récupérer votre position');
+            showError('Impossible to get your location');
         }
     } catch (error) {
-        showError('Erreur: ' + error.message);
+        showError('Error : ' + error.message);
     } finally {
         hideLoading();
     }
 }
 
 // ============================================
-// CALCULER UN ITINÉRAIRE
+// GET ITINERARY
 // ============================================
 
 async function calculateRoute() {
@@ -240,7 +236,7 @@ async function calculateRoute() {
     const useBubi = document.getElementById('use-bubi').checked;
 
     if (!startAddress || !endAddress) {
-        showError('Veuillez renseigner les deux adresses');
+        showError('Please enter both start and end addresses');
         return;
     }
 
@@ -249,7 +245,6 @@ async function calculateRoute() {
     clearRoute();
 
     try {
-        // Géocoder les adresses
         const startResponse = await fetch('/api/geocode', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -265,7 +260,7 @@ async function calculateRoute() {
         const endData = await endResponse.json();
 
         if (!startData.success || !endData.success) {
-            showError('Impossible de trouver les adresses');
+            showError('Impossible to find addresses');
             return;
         }
 
@@ -278,19 +273,17 @@ async function calculateRoute() {
             lon: endData.longitude
         };
 
-        // Marqueurs de départ et arrivée
         startMarker = L.marker([startCoords.lat, startCoords.lon], { icon: startIcon })
             .addTo(map)
-            .bindPopup('<b>Départ</b>');
+            .bindPopup('<b>Start</b>');
         markers.push(startMarker);
 
         endMarker = L.marker([endCoords.lat, endCoords.lon], { icon: endIcon })
             .addTo(map)
-            .bindPopup('<b>Arrivée</b>');
+            .bindPopup('<b>End</b>');
         markers.push(endMarker);
 
         if (useBubi) {
-            // Itinéraire avec stations Bubi
             const routeResponse = await fetch('/api/route-with-stations', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -306,10 +299,9 @@ async function calculateRoute() {
             if (routeData.success) {
                 displayRouteWithStations(routeData);
             } else {
-                showError('Impossible de calculer l\'itinéraire');
+                showError('Impossible to calculate the route');
             }
         } else {
-            // Itinéraire direct à vélo
             const routeResponse = await fetch('/api/route', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -326,11 +318,10 @@ async function calculateRoute() {
             if (routeData.success) {
                 displaySimpleRoute(routeData.route);
             } else {
-                showError('Impossible de calculer l\'itinéraire');
+                showError('Impossible to calculate the route');
             }
         }
 
-        // Ajuster la vue
         const bounds = L.latLngBounds([
             [startCoords.lat, startCoords.lon],
             [endCoords.lat, endCoords.lon]
@@ -338,14 +329,14 @@ async function calculateRoute() {
         map.fitBounds(bounds, { padding: [50, 50] });
 
     } catch (error) {
-        showError('Erreur: ' + error.message);
+        showError('Error : ' + error.message);
     } finally {
         hideLoading();
     }
 }
 
 // ============================================
-// AFFICHAGE DES ITINÉRAIRES
+// DISPLAY ROUTE
 // ============================================
 
 function displaySimpleRoute(route) {
@@ -362,31 +353,29 @@ function displaySimpleRoute(route) {
 
     document.getElementById('route-info').style.display = 'block';
     document.getElementById('route-info').innerHTML = `
-        <h3><i class="fas fa-bicycle"></i> Itinéraire à vélo</h3>
-        <p><strong>Distance:</strong> ${distance} km</p>
-        <p><strong>Durée estimée:</strong> ${duration} minutes</p>
+        <h3><i class="fas fa-bicycle"></i>Bike itinerary</h3>
+        <p><strong>Distance :</strong> ${distance} km</p>
+        <p><strong>Estimate time :</strong> ${duration} minutes</p>
     `;
 }
 
 function displayRouteWithStations(data) {
     const { start_station, end_station, routes, total_distance, total_duration } = data;
 
-    // Marqueurs des stations
     if (start_station) {
         const stationMarker = L.marker([start_station.lat, start_station.lon], { icon: stationIcon })
             .addTo(map)
-            .bindPopup(`<b>Station de départ</b><br>${start_station.name}`);
+            .bindPopup(`<b>Start station</b><br>${start_station.name}`);
         markers.push(stationMarker);
     }
 
     if (end_station) {
         const stationMarker = L.marker([end_station.lat, end_station.lon], { icon: stationIcon })
             .addTo(map)
-            .bindPopup(`<b>Station d'arrivée</b><br>${end_station.name}`);
+            .bindPopup(`<b>End station</b><br>${end_station.name}`);
         markers.push(stationMarker);
     }
 
-    // Afficher les segments
     if (routes.walk_to_start) {
         const coords = routes.walk_to_start.coordinates.map(c => [c[1], c[0]]);
         L.polyline(coords, { color: '#95a5a6', weight: 4, opacity: 0.7, dashArray: '5, 10' }).addTo(map);
@@ -402,39 +391,38 @@ function displayRouteWithStations(data) {
         L.polyline(coords, { color: '#95a5a6', weight: 4, opacity: 0.7, dashArray: '5, 10' }).addTo(map);
     }
 
-    // Afficher les infos
     const distance = (total_distance / 1000).toFixed(2);
     const duration = Math.round(total_duration / 60);
 
     document.getElementById('route-info').style.display = 'block';
     document.getElementById('route-info').innerHTML = `
-        <h3><i class="fas fa-route"></i> Itinéraire avec Bubi</h3>
+        <h3><i class="fas fa-route"></i> Itinerary with bubi</h3>
 
         <div class="route-segment walk">
-            <strong>🚶 Marche jusqu'à la station</strong><br>
+            <strong>🚶 Walk to the station</strong><br>
             ${start_station.name}<br>
             ${(start_station.distance).toFixed(2)} km
         </div>
 
         <div class="route-segment bike">
-            <strong>🚴 Trajet à vélo</strong><br>
+            <strong>🚴 Bike route</strong><br>
             ${start_station.name} → ${end_station.name}<br>
             ${(routes.bike.distance / 1000).toFixed(2)} km
         </div>
 
         <div class="route-segment walk">
-            <strong>🚶 Marche depuis la station</strong><br>
+            <strong>🚶 Walk from the station</strong><br>
             ${end_station.name}<br>
             ${(end_station.distance).toFixed(2)} km
         </div>
 
-        <p><strong>Distance totale:</strong> ${distance} km</p>
-        <p><strong>Durée totale estimée:</strong> ${duration} minutes</p>
+        <p><strong>Total distance : </strong> ${distance} km</p>
+        <p><strong>Estimate Time : </strong> ${duration} minutes</p>
     `;
 }
 
 // ============================================
-// GESTION DES STATIONS
+// MANAGE STATIONS
 // ============================================
 
 async function showAllStations() {
@@ -458,17 +446,16 @@ async function showAllStations() {
             document.getElementById('station-info').style.display = 'block';
             document.getElementById('station-info').innerHTML = `
                 <h3><i class="fas fa-bicycle"></i> Stations Bubi</h3>
-                <p><strong>Nombre de stations:</strong> ${data.stations.length}</p>
+                <p><strong>Number of station : </strong> ${data.stations.length}</p>
             `;
 
-            // Ajuster la vue pour montrer toutes les stations
             const bounds = L.latLngBounds(data.stations.map(s => [s.lat, s.lon]));
             map.fitBounds(bounds, { padding: [50, 50] });
         } else {
-            showError('Impossible de charger les stations');
+            showError('Impossible to load stations');
         }
     } catch (error) {
-        showError('Erreur: ' + error.message);
+        showError('Error : ' + error.message);
     } finally {
         hideLoading();
     }
@@ -479,24 +466,21 @@ async function findNearestStation() {
     clearMarkers();
 
     try {
-        // D'abord obtenir la position
         const locationResponse = await fetch('/api/my-location');
         const locationData = await locationResponse.json();
 
         if (!locationData.success) {
-            showError('Impossible de récupérer votre position');
+            showError('Impossible to get your location');
             return;
         }
 
         const { latitude, longitude } = locationData;
 
-        // Marqueur de position
         const posMarker = L.marker([latitude, longitude])
             .addTo(map)
-            .bindPopup('<b>Votre position</b>');
+            .bindPopup('<b>Your position</b>');
         markers.push(posMarker);
 
-        // Trouver la station la plus proche
         const stationResponse = await fetch('/api/nearest-station', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -513,7 +497,6 @@ async function findNearestStation() {
                 .openPopup();
             markers.push(stationMarker);
 
-            // Tracer une ligne
             L.polyline([
                 [latitude, longitude],
                 [station.lat, station.lon]
@@ -526,32 +509,123 @@ async function findNearestStation() {
 
             document.getElementById('station-info').style.display = 'block';
             document.getElementById('station-info').innerHTML = `
-                <h3><i class="fas fa-map-marker-alt"></i> Station la plus proche</h3>
-                <p><strong>Nom:</strong> ${station.name}</p>
-                <p><strong>Distance:</strong> ${station.distance} km</p>
+                <h3><i class="fas fa-map-marker-alt"></i> Nearest station</h3>
+                <p><strong>Name : </strong> ${station.name}</p>
+                <p><strong>Distance : </strong> ${station.distance} km</p>
             `;
 
-            // Ajuster la vue
             const bounds = L.latLngBounds([
                 [latitude, longitude],
                 [station.lat, station.lon]
             ]);
             map.fitBounds(bounds, { padding: [100, 100] });
         } else {
-            showError('Aucune station trouvée');
+            showError('No station found');
         }
     } catch (error) {
-        showError('Erreur: ' + error.message);
+        showError('Error : ' + error.message);
     } finally {
         hideLoading();
     }
 }
 
 // ============================================
-// GESTIONNAIRES D'ÉVÉNEMENTS
+// WEATHER
 // ============================================
 
-document.getElementById('search-address').addEventListener('keypress', function(e) {
+async function showAllWeather() {
+    try {
+        const response = await fetch('/api/weather');
+        const data = await response.json();
+
+        if (data.success) {
+            const { precipitation, temperature, wind_speed } = data.weather;
+
+            // Update weather widget
+            document.getElementById('temp').textContent = `${temperature}°C`;
+            document.getElementById('wind').textContent = `${wind_speed} km/h`;
+            document.getElementById('precipitation').textContent = `${precipitation}%`;
+
+            // Store weather data globally for rain alert
+            window.currentWeather = {
+                precipitation,
+                temperature,
+                wind_speed
+            };
+        }
+    } catch (error) {
+        console.error('Erreur météo:', error);
+        document.getElementById('temp').textContent = 'N/A';
+        document.getElementById('wind').textContent = 'N/A';
+        document.getElementById('precipitation').textContent = 'N/A';
+    }
+}
+
+showAllWeather();
+
+setInterval(showAllWeather, 600000);
+
+// ============================================
+// RAIN ALERT FUNCTIONS
+// ============================================
+
+function checkRainAndShowAlert() {
+    if (window.currentWeather && window.currentWeather.precipitation > 30) {
+        showRainAlert();
+    }
+}
+
+function showRainAlert() {
+    const overlay = document.getElementById('rain-alert-overlay');
+    const alert = document.getElementById('rain-alert');
+
+    // Update rain alert with current weather data
+    if (window.currentWeather) {
+        document.getElementById('rain-precipitation').textContent =
+            `${window.currentWeather.precipitation}%`;
+        document.getElementById('rain-temperature').textContent =
+            `${window.currentWeather.temperature}°C`;
+        document.getElementById('rain-wind').textContent =
+            `${window.currentWeather.wind_speed} km/h`;
+    }
+
+    overlay.classList.add('show');
+    alert.classList.add('show');
+}
+
+function closeRainAlert() {
+    const overlay = document.getElementById('rain-alert-overlay');
+    const alert = document.getElementById('rain-alert');
+
+    overlay.classList.remove('show');
+    alert.classList.remove('show');
+}
+
+function switchToBKK() {
+    closeRainAlert();
+
+    // Switch to BKK tab
+    document.querySelectorAll('.tab-btn-locomotion').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.includes('BKK') || btn.onclick.toString().includes('bkk')) {
+            btn.classList.add('active');
+        }
+    });
+
+    document.querySelectorAll('.tab-content-locomotion').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.getElementById('tab-bkk').classList.add('active');
+
+    // Show notification
+    showSearchNotification('Switched to public transport (BKK)', 'success');
+}
+
+// ============================================
+// EVENT LISTENERS FOR ENTER KEY
+// ============================================
+
+document.getElementById('quick-search-input').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') searchAddress();
 });
 

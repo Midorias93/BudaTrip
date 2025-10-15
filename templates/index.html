@@ -1,14 +1,12 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budapest Bike Routes - Smart City</title>
+    <title>BudaTrip - Smart City</title>
 
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -16,92 +14,181 @@
 <body>
     <div id="map"></div>
 
+        <!-- Barre de recherche rapide en haut à gauche -->
+    <div class="quick-search-bar">
+        <div class="search-input-container">
+            <i class="fas fa-search search-icon"></i>
+            <input
+                type="text"
+                id="quick-search-input"
+                placeholder="Search an address in Budapest..."
+            >
+            <button class="search-btn" onclick="searchAddress()">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+        <button class="location-btn" onclick="getMyLocation()" title="My location">
+            <i class="fas fa-location-arrow"></i>
+        </button>
+    </div>
+
     <div class="control-panel">
         <h1>
             <i class="fas fa-bicycle"></i>
-            Budapest Bike Routes
+            BudaTrip
         </h1>
 
-        <div class="tab-buttons">
-            <button class="tab-btn active" onclick="switchTab('search')">
-                <i class="fas fa-search"></i> Recherche
+        <div class="tab-buttons-locomotion">
+            <button class="tab-btn-locomotion active" onclick="switchTabLocomotion('bike')">
+                <i class="fas fa-bicycle"></i> Bike
             </button>
-            <button class="tab-btn" onclick="switchTab('route')">
-                <i class="fas fa-route"></i> Itinéraire
+            <button class="tab-btn-locomotion" onclick="switchTabLocomotion('bkk')">
+                <i class="fas fa-bkk"></i> Public Transport
             </button>
-            <button class="tab-btn" onclick="switchTab('stations')">
-                <i class="fas fa-map-marker-alt"></i> Stations
+            <button class="tab-btn-locomotion" onclick="switchTabLocomotion('car')">
+                <i class="fas fa-car"></i> Car
             </button>
         </div>
 
-        <!-- Onglet Recherche -->
-        <div id="tab-search" class="tab-content active">
-            <div class="input-group">
-                <label><i class="fas fa-map-pin"></i> Rechercher une adresse</label>
-                <input type="text" id="search-address" placeholder="Ex: Szondi u 47, Budapest">
-            </div>
-            <button class="btn btn-primary" onclick="searchAddress()">
-                <i class="fas fa-search"></i> Rechercher
-            </button>
 
-            <button class="btn btn-success small-btn" onclick="getMyLocation()">
-                <i class="fas fa-location-arrow"></i> Ma position
-            </button>
+       <!-- Bike Section -->
+        <div id="tab-bike" class="tab-content-locomotion active">
 
-            <div id="search-info" class="info-box" style="display: none;"></div>
-        </div>
-
-        <!-- Onglet Itinéraire -->
-        <div id="tab-route" class="tab-content">
-            <div class="input-group">
-                <label><i class="fas fa-play"></i> Départ</label>
-                <input type="text" id="start-address" placeholder="Adresse de départ">
+            <!-- Buttons -->
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('route')">
+                    <i class="fas fa-route"></i> Itinerary
+                </button>
+                <button class="tab-btn" onclick="switchTab('stations')">
+                    <i class="fas fa-map-marker-alt"></i> Stations
+                </button>
             </div>
 
-            <div class="input-group">
-                <label><i class="fas fa-stop"></i> Arrivée</label>
-                <input type="text" id="end-address" placeholder="Adresse d'arrivée">
+            <!-- Itinerary -->
+            <div id="tab-route" class="tab-content active">
+                <div class="input-group">
+                    <label><i class="fas fa-play"></i> Start </label>
+                    <input type="text" id="start-address" placeholder="start address">
+                </div>
+
+                <div class="input-group">
+                    <label><i class="fas fa-stop"></i> End </label>
+                    <input type="text" id="end-address" placeholder="end address">
+                </div>
+
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="use-bubi" checked>
+                        <i class="fas fa-bicycle"></i> Use Bubi stations
+                    </label>
+                </div>
+
+                <button class="btn btn-primary" onclick="calculateRoute()">
+                    <i class="fas fa-route"></i> Calculate Route
+                </button>
+
+                <div id="route-info" class="info-box" style="display: none;"></div>
             </div>
 
-            <div class="checkbox-group">
-                <label>
-                    <input type="checkbox" id="use-bubi" checked>
-                    <i class="fas fa-bicycle"></i> Utiliser les stations Bubi
-                </label>
+            <!-- Stations -->
+            <div id="tab-stations" class="tab-content">
+                <button class="btn btn-success" onclick="showAllStations()">
+                    <i class="fas fa-bicycle"></i> Display all stations
+                </button>
+
+                <button class="btn btn-warning" onclick="findNearestStation()">
+                    <i class="fas fa-location-arrow"></i> Station near me
+                </button>
+
+                <div id="station-info" class="info-box" style="display: none;"></div>
             </div>
 
-            <button class="btn btn-primary" onclick="calculateRoute()">
-                <i class="fas fa-route"></i> Calculer l'itinéraire
-            </button>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>loading...</p>
+            </div>
 
-            <div id="route-info" class="info-box" style="display: none;"></div>
+            <div class="error-message" id="error-message"></div>
+
         </div>
 
-        <!-- Onglet Stations -->
-        <div id="tab-stations" class="tab-content">
-            <button class="btn btn-success" onclick="showAllStations()">
-                <i class="fas fa-bicycle"></i> Afficher toutes les stations
-            </button>
-
-            <button class="btn btn-warning" onclick="findNearestStation()">
-                <i class="fas fa-location-arrow"></i> Station la plus proche
-            </button>
-
-            <div id="station-info" class="info-box" style="display: none;"></div>
+        <div id="tab-bkk" class="tab-content-locomotion">
+            <div class="info-box">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>BKK is not available for the moment.</span>
+            </div>
         </div>
 
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Chargement...</p>
+
+        <div id="tab-car" class="tab-content-locomotion">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>Car is not available for the moment.</span>
         </div>
 
-        <div class="error-message" id="error-message"></div>
+    </div>
+    <!-- Weather -->
+    <div id="weather-widget">
+        <div class="weather-header">
+            <span>🌤️ Meteo </span>
+        </div>
+        <div class="weather-content">
+            <div class="weather-item">
+                <span class="weather-icon">🌡️</span>
+                <span class="weather-label">Temperature : </span>
+                <span class="weather-value" id="temp">--°C</span>
+            </div>
+            <div class="weather-item">
+                <span class="weather-icon">💧</span>
+                <span class="weather-label">Precipitation : </span>
+                <span class="weather-value" id="precipitation">--%</span>
+            </div>
+            <div class="weather-item">
+                <span class="weather-icon">💨</span>
+                <span class="weather-label">Wind speed :</span>
+                <span class="weather-value" id="wind">-- km/h</span>
+            </div>
+        </div>
     </div>
 
-    <!-- Leaflet JS -->
+
+    <!-- Rain Alert Popup -->
+    <div class="rain-alert-overlay" id="rain-alert-overlay" onclick="closeRainAlert()"></div>
+    <div class="rain-alert" id="rain-alert">
+        <div class="rain-alert-header">
+            <div class="rain-alert-icon">🌧️</div>
+            <h2 class="rain-alert-title">Rain Alert!</h2>
+        </div>
+        <div class="rain-alert-content">
+            <p>⚠️ It's currently raining in Budapest!</p>
+            <div class="rain-alert-stats">
+                <p>
+                    <span>💧 Precipitation:</span>
+                    <strong id="rain-precipitation">--%</strong>
+                </p>
+                <p>
+                    <span>🌡️ Temperature:</span>
+                    <strong id="rain-temperature">--°C</strong>
+                </p>
+                <p>
+                    <span>💨 Wind:</span>
+                    <strong id="rain-wind">-- km/h</strong>
+                </p>
+            </div>
+            <p>Consider using public transport (BKK) or a car instead of biking.</p>
+        </div>
+        <div class="rain-alert-buttons">
+            <button class="rain-alert-btn rain-alert-btn-secondary" onclick="closeRainAlert()">
+                Continue anyway
+            </button>
+            <button class="rain-alert-btn rain-alert-btn-primary" onclick="switchToBKK()">
+                Switch to BKK
+            </button>
+        </div>
+    </div>
+
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- VOTRE SCRIPT EXTERNE -->
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
 </body>
 </html>

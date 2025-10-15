@@ -1,19 +1,26 @@
 from flask import Flask, render_template, request, jsonify
 import Location
 import Itinerary
+import Weather
+from Weather import get_weather
 
 app = Flask(__name__)
 
 print("Dossiers static:", app.static_folder)
 
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/hello-world', methods=['GET'])
+def hello_world():
+    return jsonify({'hello': 'world'}), 200
+
 
 @app.route('/api/my-location', methods=['GET'])
 def my_location():
-    """Get the user's current location"""
     try:
         coords = Location.get_my_coordinates()
         return jsonify({
@@ -34,10 +41,8 @@ def test_static():
 
 @app.route('/api/stations', methods=['GET'])
 def get_stations():
-    """Récupère toutes les stations Bubi"""
     try:
         stations = Location.bubi_location()
-        # Convertir en format JSON-friendly
         stations_list = [
             {
                 'name': name,
@@ -56,7 +61,6 @@ def get_stations():
 
 @app.route('/api/geocode', methods=['POST'])
 def geocode():
-    """Convertit une adresse en coordonnées"""
     try:
         data = request.json
         address = data.get('address')
@@ -66,14 +70,14 @@ def geocode():
         if isinstance(result, dict) and 'latitude' in result:
             return jsonify({
                 'success': True,
-                'address': result['adresse'],
+                'address': result['address'],
                 'latitude': result['latitude'],
                 'longitude': result['longitude']
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'Adresse non trouvée'
+                'error': 'Address not found'
             }), 404
 
     except Exception as e:
@@ -82,7 +86,6 @@ def geocode():
 
 @app.route('/api/nearest-station', methods=['POST'])
 def nearest_station():
-    """Trouve la station la plus proche"""
     try:
         data = request.json
         lat = float(data.get('lat'))
@@ -111,7 +114,6 @@ def nearest_station():
 
 @app.route('/api/route', methods=['POST'])
 def calculate_route():
-    """Calcule un itinéraire entre deux points"""
     try:
         data = request.json
         start_lat = float(data.get('start_lat'))
@@ -147,7 +149,6 @@ def calculate_route():
 
 @app.route('/api/route-with-stations', methods=['POST'])
 def route_with_stations():
-    """Calcule un itinéraire en utilisant les stations Bubi"""
     try:
         data = request.json
         start_lat = float(data.get('start_lat'))
@@ -157,9 +158,8 @@ def route_with_stations():
 
         stations = Location.bubi_location()
 
-        # Trouver la station la plus proche du départ
         start_station = Location.find_nearest_station((start_lat, start_lon), stations)
-        # Trouver la station la plus proche de l'arrivée
+
         end_station = Location.find_nearest_station((end_lat, end_lon), stations)
 
         if not start_station or not end_station:
@@ -171,22 +171,18 @@ def route_with_stations():
         start_station_name, start_station_coords, start_distance = start_station
         end_station_name, end_station_coords, end_distance = end_station
 
-        # Calculer les 3 segments de l'itinéraire
-        # 1. Marche jusqu'à la station de départ
         walk_to_start = Itinerary.get_route(
             (start_lat, start_lon),
             start_station_coords,
             mode='foot'
         )
 
-        # 2. Vélo entre les deux stations
         bike_route = Itinerary.get_route(
             start_station_coords,
             end_station_coords,
             mode='bike'
         )
 
-        # 3. Marche depuis la station d'arrivée
         walk_from_end = Itinerary.get_route(
             end_station_coords,
             (end_lat, end_lon),
@@ -227,6 +223,22 @@ def route_with_stations():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/weather', methods=['GET'])
+def get_weather():
+    try:
+        weather = Weather.get_weather()
+        if weather:
+            return jsonify({
+                'success': True,
+                'weather': weather
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Impossible to get weather data'
+            }), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=8000)
