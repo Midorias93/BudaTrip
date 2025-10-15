@@ -1,3 +1,6 @@
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
 * {
     margin: 0;
     padding: 0;
@@ -10,11 +13,124 @@ body {
     overflow: hidden;
 }
 
+/* ============================================
+   MAP CONTAINER
+   ============================================ */
 #map {
     height: 100vh;
     width: 100%;
 }
 
+/* ============================================
+   QUICK SEARCH BAR (Top Left)
+   ============================================ */
+.quick-search-bar {
+    position: fixed;
+    top: 20px;
+    left: 45px;
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+    animation: slideInLeft 0.5s ease;
+}
+
+.search-input-container {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    padding: 8px 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    width: 350px;
+}
+
+.search-input-container:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.search-input-container:focus-within {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 6px 25px rgba(52, 152, 219, 0.3);
+}
+
+.search-icon {
+    color: #3498db;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+#quick-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+    color: #333;
+    padding: 8px 5px;
+}
+
+#quick-search-input::placeholder {
+    color: #999;
+}
+
+.search-btn {
+    background: #3498db;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+    margin-left: 5px;
+}
+
+.search-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.6);
+}
+
+.search-btn:active {
+    transform: scale(0.95);
+}
+
+.location-btn {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    color: #3498db;
+    font-size: 18px;
+}
+
+.location-btn:hover {
+    background: #3498db;
+    color: white;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.6);
+}
+
+.location-btn:active {
+    transform: scale(0.95);
+}
+
+/* ============================================
+   CONTROL PANEL (Right Side)
+   ============================================ */
 .control-panel {
     position: absolute;
     top: 20px;
@@ -22,11 +138,12 @@ body {
     background: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     max-width: 400px;
     max-height: calc(100vh - 40px);
     overflow-y: auto;
+    animation: fadeIn 0.3s ease-in;
 }
 
 .control-panel h1 {
@@ -38,6 +155,57 @@ body {
     gap: 10px;
 }
 
+.control-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.control-panel::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.control-panel::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.control-panel::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* ============================================
+   TAB BUTTONS - Locomotion (Bike/BKK/Car)
+   ============================================ */
+.tab-buttons-locomotion {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.tab-btn-locomotion {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: #ecf0f1;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.tab-btn-locomotion.active {
+    background: #3498db;
+    color: white;
+}
+
+.tab-btn-locomotion:hover {
+    background: #3498db;
+    color: white;
+}
+
+/* ============================================
+   TAB BUTTONS - Sub Navigation (Search/Route/Stations)
+   ============================================ */
 .tab-buttons {
     display: flex;
     gap: 10px;
@@ -65,6 +233,20 @@ body {
     color: white;
 }
 
+/* ============================================
+   TAB CONTENT - Locomotion Sections
+   ============================================ */
+.tab-content-locomotion {
+    display: none;
+}
+
+.tab-content-locomotion.active {
+    display: block;
+}
+
+/* ============================================
+   TAB CONTENT - Sub Sections
+   ============================================ */
 .tab-content {
     display: none;
 }
@@ -73,6 +255,9 @@ body {
     display: block;
 }
 
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
 .input-group {
     margin-bottom: 15px;
 }
@@ -97,6 +282,25 @@ body {
     border-color: #3498db;
 }
 
+.checkbox-group {
+    margin: 15px 0;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto;
+    cursor: pointer;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
 .btn {
     width: 100%;
     padding: 12px;
@@ -139,6 +343,15 @@ body {
     background: #e67e22;
 }
 
+.small-btn {
+    padding: 8px 12px;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* ============================================
+   INFO BOX & MESSAGES
+   ============================================ */
 .info-box {
     background: #ecf0f1;
     padding: 15px;
@@ -157,6 +370,22 @@ body {
     color: #34495e;
 }
 
+.error-message {
+    background: #e74c3c;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    display: none;
+}
+
+.error-message.active {
+    display: block;
+}
+
+/* ============================================
+   LOADING SPINNER
+   ============================================ */
 .loading {
     display: none;
     text-align: center;
@@ -177,40 +406,9 @@ body {
     margin: 0 auto;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.checkbox-group {
-    margin: 15px 0;
-}
-
-.checkbox-group label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-}
-
-.checkbox-group input[type="checkbox"] {
-    width: auto;
-    cursor: pointer;
-}
-
-.error-message {
-    background: #e74c3c;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    margin-top: 10px;
-    display: none;
-}
-
-.error-message.active {
-    display: block;
-}
-
+/* ============================================
+   ROUTE SEGMENTS
+   ============================================ */
 .route-segment {
     padding: 10px;
     margin: 10px 0;
@@ -238,16 +436,31 @@ body {
     border-left-color: #27ae60;
 }
 
-.small-btn {
-    padding: 5px 10px;
-    font-size: 12px;
-    margin-top: 10px;
-}
-
+/* ============================================
+   STATION LIST
+   ============================================ */
 .station-list {
     max-height: 300px;
     overflow-y: auto;
     margin-top: 15px;
+}
+
+.station-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.station-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.station-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.station-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 .station-item {
@@ -274,50 +487,76 @@ body {
     color: #7f8c8d;
 }
 
-/* Scrollbar personnalisée */
-.control-panel::-webkit-scrollbar,
-.station-list::-webkit-scrollbar {
-    width: 8px;
+/* ============================================
+   WEATHER WIDGET (Bottom Left)
+   ============================================ */
+#weather-widget {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 220px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    padding: 12px;
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+    transition: all 0.3s ease;
 }
 
-.control-panel::-webkit-scrollbar-track,
-.station-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
+#weather-widget:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
-.control-panel::-webkit-scrollbar-thumb,
-.station-list::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 10px;
+.weather-header {
+    font-weight: bold;
+    font-size: 16px;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(52, 152, 219, 0.3);
 }
 
-.control-panel::-webkit-scrollbar-thumb:hover,
-.station-list::-webkit-scrollbar-thumb:hover {
-    background: #555;
+.weather-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .control-panel {
-        max-width: calc(100vw - 40px);
-        max-height: 50vh;
-        font-size: 14px;
-    }
+.weather-item {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: #34495e;
+}
 
-    .control-panel h1 {
-        font-size: 20px;
-    }
+.weather-icon {
+    font-size: 18px;
+    margin-right: 8px;
+    width: 25px;
+}
 
-    .tab-btn {
-        font-size: 12px;
-        padding: 8px;
-    }
+.weather-label {
+    font-weight: 500;
+    margin-right: 5px;
+    color: #555;
+}
 
-    .btn {
-        font-size: 14px;
-        padding: 10px;
-    }
+.weather-value {
+    margin-left: auto;
+    font-weight: bold;
+    color: #2980b9;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 @keyframes fadeIn {
@@ -331,6 +570,95 @@ body {
     }
 }
 
-.control-panel {
-    animation: fadeIn 0.3s ease-in;
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+    /* Control Panel */
+    .control-panel {
+        max-width: calc(100vw - 40px);
+        max-height: 50vh;
+        font-size: 14px;
+    }
+
+    .control-panel h1 {
+        font-size: 20px;
+    }
+
+    /* Tabs */
+    .tab-btn,
+    .tab-btn-locomotion {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    /* Buttons */
+    .btn {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    /* Quick Search Bar */
+    .quick-search-bar {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-input-container {
+        width: 100%;
+    }
+
+    .location-btn {
+        align-self: center;
+    }
+
+    /* Weather Widget */
+    #weather-widget {
+        width: 180px;
+        font-size: 12px;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-input-container {
+        width: calc(100vw - 40px);
+        padding: 6px 12px;
+    }
+
+    #quick-search-input {
+        font-size: 13px;
+    }
+
+    .search-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+
+    .location-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 16px;
+    }
+
+    .search-notification {
+        left: 10px;
+        right: 10px;
+        max-width: calc(100vw - 20px);
+    }
 }
