@@ -198,6 +198,11 @@ body {
     color: white;
 }
 
+.tab-btn-locomotion:hover {
+    background: #3498db;
+    color: white;
+}
+
 .tab-buttons {
     display: flex;
     gap: 10px;
@@ -556,5 +561,145 @@ body {
         width: 45px;
         height: 45px;
         font-size: 16px;
+    }
+}
+
+/* ============================================
+   RAIN ALERT POPUP
+   ============================================ */
+.rain-alert {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 2000;
+    max-width: 400px;
+    animation: popIn 0.3s ease;
+    display: none;
+}
+
+.rain-alert.show {
+    display: block;
+}
+
+.rain-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1999;
+    display: none;
+}
+
+.rain-alert-overlay.show {
+    display: block;
+}
+
+.rain-alert-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.rain-alert-icon {
+    font-size: 50px;
+    animation: bounce 1s infinite;
+}
+
+.rain-alert-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.rain-alert-content {
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.rain-alert-content p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.rain-alert-stats {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+.rain-alert-stats p {
+    margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+}
+
+.rain-alert-stats strong {
+    font-weight: 600;
+}
+
+.rain-alert-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.rain-alert-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.rain-alert-btn-primary {
+    background: white;
+    color: #667eea;
+}
+
+.rain-alert-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+}
+
+.rain-alert-btn-secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
+}
+
+.rain-alert-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
     }
 }

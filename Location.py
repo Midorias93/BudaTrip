@@ -3,41 +3,20 @@ from geopy.geocoders import Nominatim
 from enum import Enum
 import json
 from math import radians, sin, cos, sqrt, atan2
+import geocoder
 
 
-class INFO(Enum):
-    NONE = 0
-    IP = 1
-    VILLE = 2
-    REGION = 3
-    PAYS = 4
-    COO = 5
+def get_location():
+        g = geocoder.ip('me')
+        return {
+            'latitude': g.latlng[0] if g.latlng else None,
+            'longitude': g.latlng[1] if g.latlng else None,
+            'ville': g.city,
+            'pays': g.country
+        }
 
-def get_location(info: INFO = INFO.NONE):
-    try:
-        response = requests.get("https://ipinfo.io/json")
-        data = response.json()
-        dic = {"IP": data.get("ip"), "Ville": data.get("city"), "Région": data.get("region"),
-               "Pays": data.get("country"), "latitude": float(data.get("loc").split(",")[0]),
-               "longitude": float(data.get("loc").split(",")[1])}
 
-        if info == INFO.NONE:
-            return dic
-        elif info == INFO.IP:
-            return dic["IP"]
-        elif info == INFO.VILLE:
-            return dic["Ville"]
-        elif info == INFO.REGION:
-            return dic["Région"]
-        elif info == INFO.PAYS:
-            return dic["Pays"]
-        elif info == INFO.COO:
-            return dic["latitude"], dic["longitude"]
-
-    except Exception as e:
-        print("Erreur :", e)
-
-def get_my_coordinates() : return get_location(INFO.COO)
+def get_my_coordinates() : return (get_location()["latitude"],get_location()["longitude"])
 
 def bubi_location():
     response = requests.get(
@@ -101,5 +80,7 @@ def get_coordinates(address):
     except Exception as e:
         return f"Error: {e}"
 
+
+print(get_my_coordinates())
 
 

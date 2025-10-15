@@ -40,7 +40,7 @@
 
         <div class="tab-buttons-locomotion">
             <button class="tab-btn-locomotion active" onclick="switchTabLocomotion('bike')">
-                <i class="fas fa-bike"></i> Bike
+                <i class="fas fa-bicycle"></i> Bike
             </button>
             <button class="tab-btn-locomotion" onclick="switchTabLocomotion('bkk')">
                 <i class="fas fa-bkk"></i> Public Transport
@@ -150,6 +150,41 @@
         </div>
     </div>
 
+
+    <!-- Rain Alert Popup -->
+    <div class="rain-alert-overlay" id="rain-alert-overlay" onclick="closeRainAlert()"></div>
+    <div class="rain-alert" id="rain-alert">
+        <div class="rain-alert-header">
+            <div class="rain-alert-icon">🌧️</div>
+            <h2 class="rain-alert-title">Rain Alert!</h2>
+        </div>
+        <div class="rain-alert-content">
+            <p>⚠️ It's currently raining in Budapest!</p>
+            <div class="rain-alert-stats">
+                <p>
+                    <span>💧 Precipitation:</span>
+                    <strong id="rain-precipitation">--%</strong>
+                </p>
+                <p>
+                    <span>🌡️ Temperature:</span>
+                    <strong id="rain-temperature">--°C</strong>
+                </p>
+                <p>
+                    <span>💨 Wind:</span>
+                    <strong id="rain-wind">-- km/h</strong>
+                </p>
+            </div>
+            <p>Consider using public transport (BKK) or a car instead of biking.</p>
+        </div>
+        <div class="rain-alert-buttons">
+            <button class="rain-alert-btn rain-alert-btn-secondary" onclick="closeRainAlert()">
+                Continue anyway
+            </button>
+            <button class="rain-alert-btn rain-alert-btn-primary" onclick="switchToBKK()">
+                Switch to BKK
+            </button>
+        </div>
+    </div>
 
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
