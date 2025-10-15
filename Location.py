@@ -1,6 +1,5 @@
 import requests
 from geopy.geocoders import Nominatim
-from enum import Enum
 import json
 from math import radians, sin, cos, sqrt, atan2
 import geocoder

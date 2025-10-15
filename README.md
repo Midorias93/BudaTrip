@@ -20,3 +20,8 @@ To set up the project install the python packages in requirements.txt
 ```bash
 pip install -r requirement.txt
 ```
+
+How to launch the ngrok server : ( To do on the VM ubuntu )
+```bash
+ngrok http 8000 
+```
