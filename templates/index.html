@@ -43,10 +43,10 @@
                 <i class="fas fa-bike"></i> Bike
             </button>
             <button class="tab-btn-locomotion" onclick="switchTabLocomotion('bkk')">
-                <i class="fas fa-bike"></i> Public Transport
+                <i class="fas fa-bkk"></i> Public Transport
             </button>
             <button class="tab-btn-locomotion" onclick="switchTabLocomotion('car')">
-                <i class="fas fa-bike"></i> Car
+                <i class="fas fa-car"></i> Car
             </button>
         </div>
 
@@ -111,11 +111,21 @@
             <div class="error-message" id="error-message"></div>
 
         </div>
+
+        <div id="tab-bkk" class="tab-content-locomotion">
+            <div class="info-box">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>BKK is not available for the moment.</span>
+            </div>
+        </div>
+
+
+        <div id="tab-car" class="tab-content-locomotion">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>Car is not available for the moment.</span>
+        </div>
+
     </div>
-
-    <div id="tab-bkk" class="tab-content-locomotion"></div>
-    <div id="tab-car" class="tab-content-locomotion"></div>
-
     <!-- Weather -->
     <div id="weather-widget">
         <div class="weather-header">
