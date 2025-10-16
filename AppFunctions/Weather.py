@@ -1,4 +1,4 @@
-import Location
+from AppFunctions import Location
 import requests
 
 

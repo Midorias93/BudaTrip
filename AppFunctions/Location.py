@@ -78,8 +78,3 @@ def get_coordinates(address):
 
     except Exception as e:
         return f"Error: {e}"
-
-
-print(get_my_coordinates())
-
-

@@ -14,7 +14,37 @@
 <body>
     <div id="map"></div>
 
-        <!-- Barre de recherche rapide en haut à gauche -->
+    <!-- Login/Signup Bar (Not logged in) -->
+    <div class="auth-bar" id="auth-bar-guest">
+        <button class="auth-btn" onclick="openLogin()">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+        <button class="auth-btn auth-btn-signup" onclick="openSignup()">
+            <i class="fas fa-user-plus"></i> Sign Up
+        </button>
+    </div>
+
+    <!-- User Menu (Logged in) -->
+    <div class="auth-bar" id="auth-bar-user" style="display: none;">
+        <div class="user-menu">
+            <button class="user-btn" onclick="toggleUserDropdown()">
+                <i class="fas fa-user-circle"></i>
+                <span id="user-name">User</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown" id="user-dropdown">
+                <a href="/account" class="dropdown-item">
+                    <i class="fas fa-cog"></i> Account Settings
+                </a>
+                <a href="#" onclick="handleLogout()" class="dropdown-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+        <!-- Quick search Bar -->
     <div class="quick-search-bar">
         <div class="search-input-container">
             <i class="fas fa-search search-icon"></i>

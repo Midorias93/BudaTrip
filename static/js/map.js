@@ -636,3 +636,86 @@ document.getElementById('start-address').addEventListener('keypress', function(e
 document.getElementById('end-address').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') calculateRoute();
 });
+
+
+// ============================================
+// AUTH FUNCTIONS
+// ============================================
+
+function openLogin() {
+    window.location.href = '/login';
+}
+
+function openSignup() {
+    window.location.href = '/signup';
+}
+
+
+// ============================================
+// USER SESSION MANAGEMENT
+// ============================================
+
+// Check if user is logged in on page load
+function checkUserSession() {
+    const user = localStorage.getItem('user');
+
+    if (user) {
+        const userData = JSON.parse(user);
+        showUserMenu(userData);
+    } else {
+        showGuestMenu();
+    }
+}
+
+// Show user menu when logged in
+function showUserMenu(userData) {
+    document.getElementById('auth-bar-guest').style.display = 'none';
+    document.getElementById('auth-bar-user').style.display = 'flex';
+
+    // Display user name
+    const userName = userData.nom || userData.email.split('@')[0];
+    document.getElementById('user-name').textContent = userName;
+}
+
+// Show guest menu when not logged in
+function showGuestMenu() {
+    document.getElementById('auth-bar-guest').style.display = 'flex';
+    document.getElementById('auth-bar-user').style.display = 'none';
+}
+
+// Toggle user dropdown menu
+function toggleUserDropdown() {
+    const userMenu = document.querySelector('.user-menu');
+    userMenu.classList.toggle('active');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const userMenu = document.querySelector('.user-menu');
+    const userBtn = document.querySelector('.user-btn');
+
+    if (userMenu && !userMenu.contains(event.target)) {
+        userMenu.classList.remove('active');
+    }
+});
+
+// Handle logout
+function handleLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('user');
+        showGuestMenu();
+
+        // Show success message
+        const successMsg = document.createElement('div');
+        successMsg.className = 'logout-message';
+        successMsg.innerHTML = '<i class="fas fa-check-circle"></i> Logged out successfully';
+        document.body.appendChild(successMsg);
+
+        setTimeout(() => {
+            successMsg.remove();
+        }, 3000);
+    }
+}
+
+// Initialize on page load
+checkUserSession();

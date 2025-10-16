@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudaTrip - Account Settings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box account-box">
+            <div class="login-header">
+                <i class="fas fa-user-cog logo-icon"></i>
+                <h1>Account Settings</h1>
+                <p>Manage your BudaTrip account</p>
+            </div>
+
+            <!-- User Info Display -->
+            <div class="user-info-display">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-details">
+                    <h3 id="display-name">Loading...</h3>
+                    <p id="display-email">Loading...</p>
+                    <span class="user-since">Member since <span id="member-since">2024</span></span>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="account-tabs">
+                <button class="account-tab active" onclick="showAccountTab('profile')">
+                    <i class="fas fa-user"></i> Profile
+                </button>
+                <button class="account-tab" onclick="showAccountTab('security')">
+                    <i class="fas fa-lock"></i> Security
+                </button>
+                <button class="account-tab" onclick="showAccountTab('preferences')">
+                    <i class="fas fa-cog"></i> Preferences
+                </button>
+            </div>
+
+            <!-- Profile Tab -->
+            <div id="tab-profile" class="account-tab-content active">
+                <form id="profile-form" onsubmit="updateProfile(event)">
+                    <div class="input-group">
+                        <label for="name">
+                            <i class="fas fa-user"></i> Name
+                        </label>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            placeholder="Your name"
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="email-profile">
+                            <i class="fas fa-envelope"></i> Email
+                        </label>
+                        <input
+                            type="email"
+                            id="email-profile"
+                            name="email"
+                            placeholder="Your email"
+                            disabled
+                        >
+                        <small>Email cannot be changed</small>
+                    </div>
+
+                    <button type="submit" class="btn-login">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+
+            <!-- Security Tab -->
+            <div id="tab-security" class="account-tab-content">
+                <form id="password-form" onsubmit="updatePassword(event)">
+                    <div class="input-group">
+                        <label for="current-password">
+                            <i class="fas fa-lock"></i> Current Password
+                        </label>
+                        <div class="password-container">
+                            <input
+                                type="password"
+                                id="current-password"
+                                placeholder="Enter current password"
+                            >
+                            <i class="fas fa-eye toggle-password" onclick="togglePasswordField('current-password')"></i>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="new-password">
+                            <i class="fas fa-key"></i> New Password
+                        </label>
+                        <div class="password-container">
+                            <input
+                                type="password"
+                                id="new-password"
+                                placeholder="Enter new password"
+                                minlength="6"
+                            >
+                            <i class="fas fa-eye toggle-password" onclick="togglePasswordField('new-password')"></i>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="confirm-new-password">
+                            <i class="fas fa-key"></i> Confirm New Password
+                        </label>
+                        <div class="password-container">
+                            <input
+                                type="password"
+                                id="confirm-new-password"
+                                placeholder="Confirm new password"
+                                minlength="6"
+                            >
+                            <i class="fas fa-eye toggle-password" onclick="togglePasswordField('confirm-new-password')"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-login">
+                        <i class="fas fa-shield-alt"></i> Update Password
+                    </button>
+                </form>
+            </div>
+
+            <!-- Preferences Tab -->
+            <div id="tab-preferences" class="account-tab-content">
+                <div class="preference-item">
+                    <div class="preference-info">
+                        <i class="fas fa-bell"></i>
+                        <div>
+                            <h4>Notifications</h4>
+                            <p>Receive weather and route alerts</p>
+                        </div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notifications" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="preference-item">
+                    <div class="preference-info">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <div>
+                            <h4>Save Route History</h4>
+                            <p>Keep track of your journeys</p>
+                        </div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="route-history" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="preference-item">
+                    <div class="preference-info">
+                        <i class="fas fa-moon"></i>
+                        <div>
+                            <h4>Dark Mode</h4>
+                            <p>Coming soon...</p>
+                        </div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="dark-mode" disabled>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
+
+            <div class="error-message" id="error-message" style="display: none;"></div>
+            <div class="success-message" id="success-message" style="display: none;"></div>
+
+            <!-- Danger Zone -->
+            <div class="danger-zone">
+                <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+                <button class="btn-danger" onclick="deleteAccount()">
+                    <i class="fas fa-trash-alt"></i> Delete Account
+                </button>
+            </div>
+
+            <div class="back-home">
+                <a href="/">
+                    <i class="fas fa-arrow-left"></i> Back to Map
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/account.js') }}"></script>
+</body>
+</html>
