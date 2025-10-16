@@ -1,51 +1,60 @@
 // ============================================
-// LOAD USER DATA
+// INITIALIZATION
 // ============================================
 
-function loadUserData() {
+window.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+    loadUserData();
+});
+
+// ============================================
+// AUTH CHECK
+// ============================================
+
+function checkAuth() {
     const user = localStorage.getItem('user');
 
     if (!user) {
         window.location.href = '/login';
         return;
     }
+}
+
+// ============================================
+// LOAD USER DATA
+// ============================================
+
+function loadUserData() {
+    const user = localStorage.getItem('user');
+
+    if (!user) return;
 
     const userData = JSON.parse(user);
 
-    // Display user info
-    document.getElementById('display-name').textContent = userData.nom || 'User';
-    document.getElementById('display-email').textContent = userData.email;
+    document.getElementById('sidebar-name').textContent = userData.nom || 'User';
+    document.getElementById('sidebar-email').textContent = userData.email;
 
-    // Fill form fields
     document.getElementById('name').value = userData.nom || '';
     document.getElementById('email-profile').value = userData.email;
 
-    // Set member since date
-    if (userData.created_at) {
-        const date = new Date(userData.created_at);
-        document.getElementById('member-since').textContent = date.getFullYear();
-    }
 }
 
-// Load data on page load
-window.addEventListener('DOMContentLoaded', loadUserData);
-
 // ============================================
-// TAB SWITCHING
+// SECTION NAVIGATION
 // ============================================
 
-function showAccountTab(tabName) {
-    // Remove active class from all tabs and contents
-    document.querySelectorAll('.account-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelectorAll('.account-tab-content').forEach(content => {
-        content.classList.remove('active');
+function showSection(sectionName) {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
     });
 
-    // Add active class to selected tab and content
-    event.target.classList.add('active');
-    document.getElementById(`tab-${tabName}`).classList.add('active');
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.remove('active');
+    });
+
+    event.target.closest('.nav-item').classList.add('active');
+
+    document.getElementById(`section-${sectionName}`).classList.add('active');
 }
 
 // ============================================
@@ -54,7 +63,8 @@ function showAccountTab(tabName) {
 
 function togglePasswordField(inputId) {
     const input = document.getElementById(inputId);
-    const icon = input.parentElement.querySelector('.toggle-password');
+    const button = input.parentElement.querySelector('.toggle-password');
+    const icon = button.querySelector('i');
 
     if (input.type === 'password') {
         input.type = 'text';
@@ -75,32 +85,54 @@ async function updateProfile(event) {
     event.preventDefault();
 
     const name = document.getElementById('name').value;
+    const email = document.getElementById('email-profile').value;
+    const phone = document.getElementById('phone').value;
 
     if (!name) {
-        showError('Please enter your name');
+        showToast('Please enter your name', 'error');
         return;
     }
 
     showLoading();
 
     try {
-        // Get current user
         const user = JSON.parse(localStorage.getItem('user'));
 
-        // Update user data
+        const response = await fetch(`/api/users/${user.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                nom: name,
+                email: email,
+                phone: phone
+            })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            showToast(data.error || 'Failed to update profile', 'error');
+            return;
+        }
+
+
         const updatedUser = {
             ...user,
-            nom: name
+            nom: name,
+            email: email,
+            phone: phone
         };
 
-        // Save to localStorage (in production, send to backend)
         localStorage.setItem('user', JSON.stringify(updatedUser));
 
-        showSuccess('Profile updated successfully!');
         loadUserData();
 
+        showToast('Profile updated successfully!', 'success');
+
     } catch (error) {
-        showError('Failed to update profile');
+        showToast('Failed to update profile', 'error');
         console.error('Update error:', error);
     } finally {
         hideLoading();
@@ -116,40 +148,54 @@ async function updatePassword(event) {
 
     const currentPassword = document.getElementById('current-password').value;
     const newPassword = document.getElementById('new-password').value;
-    const confirmPassword = document.getElementById('confirm-new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
 
     // Validation
     if (!currentPassword || !newPassword || !confirmPassword) {
-        showError('Please fill in all password fields');
+        showToast('Please fill in all password fields', 'error');
         return;
     }
 
     if (newPassword !== confirmPassword) {
-        showError('New passwords do not match');
+        showToast('New passwords do not match', 'error');
         return;
     }
 
     if (newPassword.length < 6) {
-        showError('Password must be at least 6 characters');
+        showToast('Password must be at least 6 characters', 'error');
         return;
     }
 
     showLoading();
 
     try {
-        // In production, send to backend
-        // const response = await fetch('/api/update-password', { ... });
+        const user = JSON.parse(localStorage.getItem('user'));
 
-        // Simulate success
-        setTimeout(() => {
-            showSuccess('Password updated successfully!');
+        // Simulate API call to backend
+        const response = await fetch(`/api/users/${user.id}/password`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                current_password: currentPassword,
+                password: newPassword
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('Password updated successfully!', 'success');
             document.getElementById('password-form').reset();
-            hideLoading();
-        }, 1000);
+        } else {
+            showToast(data.error || 'Failed to update password', 'error');
+        }
 
     } catch (error) {
-        showError('Failed to update password');
+        showToast('An error occurred. Please try again.', 'error');
         console.error('Password update error:', error);
+    } finally {
         hideLoading();
     }
 }
@@ -158,32 +204,68 @@ async function updatePassword(event) {
 // DELETE ACCOUNT
 // ============================================
 
-function deleteAccount() {
+async function deleteAccount() {
     const confirmed = confirm(
         '⚠️ WARNING: This action is irreversible!\n\n' +
         'Are you sure you want to delete your account?\n' +
         'All your data will be permanently removed.'
     );
 
-    if (confirmed) {
-        const doubleConfirm = confirm(
-            'This is your last chance!\n\n' +
-            'Click OK to permanently delete your account.'
-        );
+    if (!confirmed) return;
 
-        if (doubleConfirm) {
-            showLoading();
+    const doubleConfirm = confirm(
+        'This is your last chance!\n\n' +
+        'Type your password to confirm account deletion.\n' +
+        'Click OK to proceed.'
+    );
 
-            // In production, send delete request to backend
+    if (!doubleConfirm) return;
+
+    showLoading();
+
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        // Simulate API call
+        const response = await fetch(`/api/users/${user.id}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            localStorage.removeItem('user');
+            showToast('Account deleted successfully. Redirecting...', 'success');
+
             setTimeout(() => {
-                localStorage.removeItem('user');
-                showSuccess('Account deleted successfully. Redirecting...');
-
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 2000);
-            }, 1000);
+                window.location.href = '/';
+            }, 2000);
+        } else {
+            showToast(data.error || 'Failed to delete account', 'error');
         }
+
+    } catch (error) {
+        showToast('An error occurred. Please try again.', 'error');
+        console.error('Delete account error:', error);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// LOGOUT
+// ============================================
+
+function handleLogout() {
+    const confirmed = confirm('Are you sure you want to logout?');
+
+    if (confirmed) {
+        localStorage.removeItem('user');
+        showToast('Logged out successfully', 'success');
+
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 1500);
     }
 }
 
@@ -192,29 +274,25 @@ function deleteAccount() {
 // ============================================
 
 function showLoading() {
-    document.getElementById('loading').style.display = 'block';
+    document.getElementById('loading-overlay').classList.add('show');
 }
 
 function hideLoading() {
-    document.getElementById('loading').style.display = 'none';
+    document.getElementById('loading-overlay').classList.remove('show');
 }
 
-function showError(message) {
-    const errorDiv = document.getElementById('error-message');
-    errorDiv.textContent = message;
-    errorDiv.style.display = 'block';
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+
+    // Set icon based on type
+    const icon = type === 'success'
+        ? '<i class="fas fa-check-circle"></i>'
+        : '<i class="fas fa-exclamation-circle"></i>';
+
+    toast.innerHTML = `${icon} <span>${message}</span>`;
+    toast.className = `toast ${type} show`;
 
     setTimeout(() => {
-        errorDiv.style.display = 'none';
-    }, 5000);
-}
-
-function showSuccess(message) {
-    const successDiv = document.getElementById('success-message');
-    successDiv.textContent = message;
-    successDiv.style.display = 'block';
-
-    setTimeout(() => {
-        successDiv.style.display = 'none';
-    }, 3000);
+        toast.classList.remove('show');
+    }, 4000);
 }

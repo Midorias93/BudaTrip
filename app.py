@@ -405,6 +405,8 @@ def update_user(user_id):
         nom = data.get('nom')
         email = data.get('email')
         password = data.get('password')
+        phone = data.get('phone')
+        print(phone)
 
         # Vérifier si l'utilisateur existe
         user = asyncio.run(UserFunctions.get_user_by_id(user_id))
@@ -414,12 +416,12 @@ def update_user(user_id):
                 'error': 'Utilisateur non trouvé'
             }), 404
 
-        # Mettre à jour
         success = asyncio.run(UserFunctions.update_user(
             user_id,
             nom=nom,
             email=email,
-            password=password
+            password=password,
+            phone = phone
         ))
 
         if success:

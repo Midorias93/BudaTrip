@@ -655,7 +655,6 @@ function openSignup() {
 // USER SESSION MANAGEMENT
 // ============================================
 
-// Check if user is logged in on page load
 function checkUserSession() {
     const user = localStorage.getItem('user');
 
@@ -667,29 +666,24 @@ function checkUserSession() {
     }
 }
 
-// Show user menu when logged in
 function showUserMenu(userData) {
     document.getElementById('auth-bar-guest').style.display = 'none';
     document.getElementById('auth-bar-user').style.display = 'flex';
 
-    // Display user name
     const userName = userData.nom || userData.email.split('@')[0];
     document.getElementById('user-name').textContent = userName;
 }
 
-// Show guest menu when not logged in
 function showGuestMenu() {
     document.getElementById('auth-bar-guest').style.display = 'flex';
     document.getElementById('auth-bar-user').style.display = 'none';
 }
 
-// Toggle user dropdown menu
 function toggleUserDropdown() {
     const userMenu = document.querySelector('.user-menu');
     userMenu.classList.toggle('active');
 }
 
-// Close dropdown when clicking outside
 document.addEventListener('click', function(event) {
     const userMenu = document.querySelector('.user-menu');
     const userBtn = document.querySelector('.user-btn');
@@ -699,7 +693,6 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// Handle logout
 function handleLogout() {
     if (confirm('Are you sure you want to logout?')) {
         localStorage.removeItem('user');
@@ -717,5 +710,4 @@ function handleLogout() {
     }
 }
 
-// Initialize on page load
 checkUserSession();

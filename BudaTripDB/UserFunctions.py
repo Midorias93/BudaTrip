@@ -32,6 +32,7 @@ async def create_table():
             id SERIAL PRIMARY KEY,
             nom VARCHAR(100),
             email VARCHAR(100) UNIQUE,
+            phone VARCHAR(12) UNIQUE,
             password VARCHAR(100) NOT NULL
         )
     ''')
@@ -109,7 +110,8 @@ async def user_exists(email: str) -> bool:
 
 async def update_user(user_id: int, nom: Optional[str] = None,
                       email: Optional[str] = None,
-                      password: Optional[str] = None) -> bool:
+                      password: Optional[str] = None,
+                        phone: Optional[int] = None ) -> bool:
     updates = []
     values = []
     param_count = 1
@@ -127,6 +129,11 @@ async def update_user(user_id: int, nom: Optional[str] = None,
     if password is not None:
         updates.append(f'password = ${param_count}')
         values.append(password)
+        param_count += 1
+
+    if phone is not None:
+        updates.append(f'phone = ${param_count}')
+        values.append(phone)
         param_count += 1
 
     if not updates:

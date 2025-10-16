@@ -94,7 +94,7 @@ async function handleLogin(event) {
             // Redirect to home page after 1.5 seconds
             setTimeout(() => {
                 window.location.href = '/';
-            }, 1500);
+            }, 500);
         } else {
             showError(data.error || 'Login failed');
         }
@@ -114,10 +114,9 @@ async function handleSignup(event) {
     event.preventDefault();
 
     const nom = document.getElementById('nom').value;
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('email').value.toLowerCase();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
-    const terms = document.getElementById('terms').checked;
 
     // Validation
     if (!nom || !email || !password || !confirmPassword) {
@@ -127,16 +126,6 @@ async function handleSignup(event) {
 
     if (password !== confirmPassword) {
         showError('Passwords do not match');
-        return;
-    }
-
-    if (password.length < 6) {
-        showError('Password must be at least 6 characters');
-        return;
-    }
-
-    if (!terms) {
-        showError('Please accept the Terms & Conditions');
         return;
     }
 
@@ -155,11 +144,8 @@ async function handleSignup(event) {
 
         if (data.success) {
             showSuccess('Account created successfully! Redirecting to login...');
-
-            // Redirect to login page after 2 seconds
             setTimeout(() => {
-                window.location.href = '/login';
-            }, 2000);
+            window.location.href = '/login'}, 500);
         } else {
             showError(data.error || 'Signup failed');
         }
@@ -186,73 +172,3 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
-
-// ============================================
-// USER SESSION MANAGEMENT
-// ============================================
-
-// Check if user is logged in on page load
-function checkUserSession() {
-    const user = localStorage.getItem('user');
-
-    if (user) {
-        const userData = JSON.parse(user);
-        showUserMenu(userData);
-    } else {
-        showGuestMenu();
-    }
-}
-
-// Show user menu when logged in
-function showUserMenu(userData) {
-    document.getElementById('auth-bar-guest').style.display = 'none';
-    document.getElementById('auth-bar-user').style.display = 'flex';
-
-    // Display user name
-    const userName = userData.nom || userData.email.split('@')[0];
-    document.getElementById('user-name').textContent = userName;
-}
-
-// Show guest menu when not logged in
-function showGuestMenu() {
-    document.getElementById('auth-bar-guest').style.display = 'flex';
-    document.getElementById('auth-bar-user').style.display = 'none';
-}
-
-// Toggle user dropdown menu
-function toggleUserDropdown() {
-    const userMenu = document.querySelector('.user-menu');
-    userMenu.classList.toggle('active');
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(event) {
-    const userMenu = document.querySelector('.user-menu');
-    const userBtn = document.querySelector('.user-btn');
-
-    if (userMenu && !userMenu.contains(event.target)) {
-        userMenu.classList.remove('active');
-    }
-});
-
-// Handle logout
-function handleLogout() {
-    if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('user');
-        showGuestMenu();
-
-        // Show success message
-        const successMsg = document.createElement('div');
-        successMsg.className = 'logout-message';
-        successMsg.innerHTML = '<i class="fas fa-check-circle"></i> Logged out successfully';
-        document.body.appendChild(successMsg);
-
-        setTimeout(() => {
-            successMsg.remove();
-        }, 3000);
-    }
-}
-
-// Initialize on page load
-checkUserSession();
-
