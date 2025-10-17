@@ -914,3 +914,75 @@ body {
     }
 }
 
+/* ============================================
+   INPUT WITH LOCATION BUTTON
+   ============================================ */
+.input-with-location {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.input-with-location input {
+    flex: 1;
+}
+
+.location-input-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    color: #3498db;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.location-input-btn:hover {
+    background: #3498db;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+}
+
+.location-input-btn:hover::after {
+    content: "Your location";
+    position: absolute;
+    right: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: #2c3e50;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.location-input-btn:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+    .location-input-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+
+    .location-input-btn:hover::after {
+        font-size: 11px;
+        padding: 5px 10px;
+    }
+}
+

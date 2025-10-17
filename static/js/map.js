@@ -226,12 +226,43 @@ async function getMyLocation() {
     }
 }
 
+async function setMyLocation() {
+    showLoading();
+
+    try {
+        const response = await fetch('/api/my-location');
+        const data = await response.json();
+        if (data.success) {
+            const startInput = document.getElementById('start-address');
+
+            startInput.dataset.coordinates = data.latitude + ', ' + data.longitude;
+
+            startInput.value = '📍 Your location';
+
+            startInput.style.fontWeight = '500';
+
+            hideLoading();
+        }
+    } catch (error) {
+        showError('Error : ' + error.message);
+    }
+}
+
+
 // ============================================
 // GET ITINERARY
 // ============================================
 
 async function calculateRoute() {
-    const startAddress = document.getElementById('start-address').value;
+    const startInput = document.getElementById('start-address');
+
+    let startAddress;
+    if (startInput.dataset.coordinates) {
+        startAddress = startInput.dataset.coordinates;
+    } else {
+        startAddress = startInput.value;
+    }
+
     const endAddress = document.getElementById('end-address').value;
     const useBubi = document.getElementById('use-bubi').checked;
 

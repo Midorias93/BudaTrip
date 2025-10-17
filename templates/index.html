@@ -74,7 +74,7 @@
                 <i class="fas fa-bicycle"></i> Bike
             </button>
             <button class="tab-btn-locomotion" onclick="switchTabLocomotion('bkk')">
-                <i class="fas fa-bkk"></i> Public Transport
+                <i class="fas fa-train"></i> Public Transport
             </button>
             <button class="tab-btn-locomotion" onclick="switchTabLocomotion('car')">
                 <i class="fas fa-car"></i> Car
@@ -99,8 +99,14 @@
             <div id="tab-route" class="tab-content active">
                 <div class="input-group">
                     <label><i class="fas fa-play"></i> Start </label>
-                    <input type="text" id="start-address" placeholder="start address">
+                    <div class="input-with-location">
+                        <input type="text" id="start-address" placeholder="start address">
+                        <button class="location-input-btn" onclick="setMyLocation('start-address')" title="Your location">
+                            <i class="fas fa-location-arrow"></i>
+                        </button>
+                    </div>
                 </div>
+
 
                 <div class="input-group">
                     <label><i class="fas fa-stop"></i> End </label>
@@ -152,8 +158,10 @@
 
 
         <div id="tab-car" class="tab-content-locomotion">
-            <i class="fas fa-exclamation-circle"></i>
-            <span>Car is not available for the moment.</span>
+            <div class="info-box">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Car is not available for the moment.</span>
+            </div>
         </div>
 
     </div>

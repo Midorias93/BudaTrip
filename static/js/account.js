@@ -161,17 +161,11 @@ async function updatePassword(event) {
         return;
     }
 
-    if (newPassword.length < 6) {
-        showToast('Password must be at least 6 characters', 'error');
-        return;
-    }
-
     showLoading();
 
     try {
         const user = JSON.parse(localStorage.getItem('user'));
 
-        // Simulate API call to backend
         const response = await fetch(`/api/users/${user.id}/password`, {
             method: 'PUT',
             headers: {
