@@ -14,7 +14,37 @@
 <body>
     <div id="map"></div>
 
-        <!-- Barre de recherche rapide en haut à gauche -->
+    <!-- Guest Menu -->
+    <div class="auth-bar" id="auth-bar-guest">
+        <button class="auth-btn" onclick="openLogin()">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+        <button class="auth-btn auth-btn-signup" onclick="openSignup()">
+            <i class="fas fa-user-plus"></i> Sign Up
+        </button>
+    </div>
+
+    <!-- User Menu -->
+    <div class="auth-bar" id="auth-bar-user" style="display: none;">
+        <div class="user-menu">
+            <button class="user-btn" onclick="toggleUserDropdown()">
+                <i class="fas fa-user-circle"></i>
+                <span id="user-name">User</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown" id="user-dropdown">
+                <a href="/account" class="dropdown-item">
+                    <i class="fas fa-cog"></i> Account Settings
+                </a>
+                <a href="#" onclick="handleLogout()" class="dropdown-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Quick search Bar -->
     <div class="quick-search-bar">
         <div class="search-input-container">
             <i class="fas fa-search search-icon"></i>
@@ -32,6 +62,7 @@
         </button>
     </div>
 
+    <!-- Control panel -->
     <div class="control-panel">
         <h1>
             <i class="fas fa-bicycle"></i>
@@ -43,7 +74,7 @@
                 <i class="fas fa-bicycle"></i> Bike
             </button>
             <button class="tab-btn-locomotion" onclick="switchTabLocomotion('bkk')">
-                <i class="fas fa-bkk"></i> Public Transport
+                <i class="fas fa-train"></i> Public Transport
             </button>
             <button class="tab-btn-locomotion" onclick="switchTabLocomotion('car')">
                 <i class="fas fa-car"></i> Car
@@ -68,8 +99,14 @@
             <div id="tab-route" class="tab-content active">
                 <div class="input-group">
                     <label><i class="fas fa-play"></i> Start </label>
-                    <input type="text" id="start-address" placeholder="start address">
+                    <div class="input-with-location">
+                        <input type="text" id="start-address" placeholder="start address">
+                        <button class="location-input-btn" onclick="setMyLocation('start-address')" title="Your location">
+                            <i class="fas fa-location-arrow"></i>
+                        </button>
+                    </div>
                 </div>
+
 
                 <div class="input-group">
                     <label><i class="fas fa-stop"></i> End </label>
@@ -121,11 +158,14 @@
 
 
         <div id="tab-car" class="tab-content-locomotion">
-            <i class="fas fa-exclamation-circle"></i>
-            <span>Car is not available for the moment.</span>
+            <div class="info-box">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Car is not available for the moment.</span>
+            </div>
         </div>
 
     </div>
+
     <!-- Weather -->
     <div id="weather-widget">
         <div class="weather-header">

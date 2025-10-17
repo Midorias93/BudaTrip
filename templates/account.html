@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudaTrip - Account Settings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+</head>
+<body>
+    <!-- Header Bar -->
+    <div class="account-header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-bicycle"></i>
+                <span>BudaTrip</span>
+            </div>
+            <a href="/" class="back-home-btn">
+                <i class="fas fa-arrow-left"></i> Back to Map
+            </a>
+        </div>
+    </div>
+
+    <div class="account-container">
+        <!-- Sidebar Navigation -->
+        <aside class="account-sidebar">
+            <!-- User Info Card -->
+            <div class="user-card">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-info">
+                    <h3 id="sidebar-name">Loading...</h3>
+                    <p id="sidebar-email">Loading...</p>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="sidebar-nav">
+                <button class="nav-item active" onclick="showSection('profile')">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </button>
+
+                <button class="nav-item" onclick="showSection('security')">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Security</span>
+                </button>
+
+                <button class="nav-item" onclick="showSection('subscription')">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Subscriptions</span>
+                    <span class="coming-soon-badge">Soon</span>
+                </button>
+
+                <button class="nav-item" onclick="showSection('estimate')">
+                    <i class="fas fa-calculator"></i>
+                    <span>Estimate</span>
+                    <span class="coming-soon-badge">Soon</span>
+                </button>
+
+                <div class="nav-divider"></div>
+
+                <button class="nav-item nav-item-danger" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="account-main">
+            <!-- Profile Section -->
+            <section id="section-profile" class="content-section active">
+                <div class="section-header">
+                    <h2><i class="fas fa-user"></i> Profile Information</h2>
+                    <p>Manage your personal information</p>
+                </div>
+
+                <div class="content-card">
+                    <form id="profile-form" onsubmit="updateProfile(event)">
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="name">
+                                    <i class="fas fa-user"></i> Full Name
+                                </label>
+                                <input
+                                    type="text"
+                                    id="name"
+                                    name="name"
+                                    placeholder="Enter your name"
+                                    required
+                                >
+                            </div>
+
+                            <div class="input-group">
+                                <label for="email-profile">
+                                    <i class="fas fa-envelope"></i> Email Address
+                                </label>
+                                <input
+                                    type="email"
+                                    id="email-profile"
+                                    name="email"
+                                    placeholder="your@email.com"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="phone">
+                                    <i class="fas fa-phone"></i> Phone Number
+                                </label>
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    placeholder="+33 X XX XX XX XX"
+                                >
+                            </div>
+
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Account Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>0</h4>
+                            <p>Routes Calculated</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-bicycle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>0 km</h4>
+                            <p>Distance Traveled</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>0 kg</h4>
+                            <p>CO₂ Saved</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Security Section -->
+            <section id="section-security" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-shield-alt"></i> Security Settings</h2>
+                    <p>Manage your password and security preferences</p>
+                </div>
+
+                <div class="content-card">
+                    <h3 class="card-title">Change Password</h3>
+                    <form id="password-form" onsubmit="updatePassword(event)">
+                        <div class="input-group">
+                            <label for="current-password">
+                                <i class="fas fa-lock"></i> Current Password
+                            </label>
+                            <div class="password-wrapper">
+                                <input
+                                    type="password"
+                                    id="current-password"
+                                    placeholder="Enter current password"
+                                    required
+                                >
+                                <button type="button" class="toggle-password" onclick="togglePasswordField('current-password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="new-password">
+                                <i class="fas fa-key"></i> New Password
+                            </label>
+                            <div class="password-wrapper">
+                                <input
+                                    type="password"
+                                    id="new-password"
+                                    placeholder="Enter new password"
+                                    required
+                                >
+                                <button type="button" class="toggle-password" onclick="togglePasswordField('new-password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="confirm-password">
+                                <i class="fas fa-check-circle"></i> Confirm New Password
+                            </label>
+                            <div class="password-wrapper">
+                                <input
+                                    type="password"
+                                    id="confirm-password"
+                                    placeholder="Confirm new password"
+                                    required
+                                >
+                                <button type="button" class="toggle-password" onclick="togglePasswordField('confirm-password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-shield-alt"></i> Update Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="content-card danger-card">
+                    <h3 class="card-title text-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Danger Zone
+                    </h3>
+                    <p class="danger-text">
+                        Once you delete your account, there is no going back. Please be certain.
+                    </p>
+                    <button class="btn btn-danger" onclick="deleteAccount()">
+                        <i class="fas fa-trash-alt"></i> Delete My Account
+                    </button>
+                </div>
+            </section>
+
+            <!-- Subscription Section -->
+            <section id="section-subscription" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-ticket-alt"></i> Subscriptions & Tickets</h2>
+                    <p>Manage your transportation subscriptions</p>
+                </div>
+
+                <div class="feature-preview-large">
+                    <div class="preview-icon">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <h3>Subscription Management</h3>
+                    <p>This feature will allow you to:</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Store your BKK monthly passes</li>
+                        <li><i class="fas fa-check"></i> Track your Bubi bike subscriptions</li>
+                        <li><i class="fas fa-check"></i> Manage transportation tickets</li>
+                        <li><i class="fas fa-check"></i> View expiration dates</li>
+                    </ul>
+                    <span class="coming-soon-tag-large">Coming Soon</span>
+                </div>
+            </section>
+
+            <!-- Estimate Section -->
+            <section id="section-estimate" class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-calculator"></i> Cost & Time Estimate</h2>
+                    <p>Calculate journey costs and duration</p>
+                </div>
+
+                <div class="feature-preview-large">
+                    <div class="preview-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h3>Journey Estimator</h3>
+                    <p>This feature will allow you to:</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Calculate travel costs between two points</li>
+                        <li><i class="fas fa-check"></i> Compare different transportation modes</li>
+                        <li><i class="fas fa-check"></i> Estimate journey duration</li>
+                        <li><i class="fas fa-check"></i> View environmental impact</li>
+                    </ul>
+                    <span class="coming-soon-tag-large">Coming Soon</span>
+                </div>
+            </section>
+
+            <!-- Messages -->
+            <div class="toast" id="toast"></div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/account.js') }}"></script>
+</body>
+</html>

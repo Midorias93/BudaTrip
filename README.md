@@ -21,6 +21,16 @@ To set up the project install the python packages in requirements.txt
 pip install -r requirement.txt
 ```
 
+to launch the data base ( to do on the VM ubuntu )
+```bash
+docker compose up -d
+```
+to stop the data base ( to do on the VM ubuntu )
+```bash
+# you can add the -v option to remove the volumes
+docker compose down 
+```
+
 How to launch the ngrok server : ( To do on the VM ubuntu )
 ```bash
 ngrok http 8000 
