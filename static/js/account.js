@@ -24,6 +24,23 @@ function checkAuth() {
 // LOAD USER DATA
 // ============================================
 
+function formatFrenchPhone(raw) {
+    if (!raw) return '';
+    let digits = String(raw).replace(/\D/g, ''); // garder seulement les chiffres
+    if (digits.startsWith('33')) digits = digits.slice(2); // retirer indicatif FR si présent
+    if (digits.startsWith('0')) digits = digits.slice(1); // retirer le 0 national
+    digits = digits.slice(0, 9); // garder au maximum 9 chiffres (format national sans le 0)
+
+    const parts = [];
+    if (digits.length > 0) parts.push(digits.slice(0, 1));
+    if (digits.length > 1) parts.push(digits.slice(1, 3));
+    if (digits.length > 3) parts.push(digits.slice(3, 5));
+    if (digits.length > 5) parts.push(digits.slice(5, 7));
+    if (digits.length > 7) parts.push(digits.slice(7, 9));
+
+    return parts.length ? '+33 ' + parts.join(' ') : '';
+}
+
 function loadUserData() {
     const user = localStorage.getItem('user');
 
@@ -36,6 +53,10 @@ function loadUserData() {
 
     document.getElementById('name').value = userData.nom || '';
     document.getElementById('email-profile').value = userData.email;
+    phone = userData.phone || '';
+    phone = formatFrenchPhone(phone);
+    document.getElementById('phone').value = phone;
+
 
 }
 
