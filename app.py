@@ -643,6 +643,8 @@ def register():
 async def initDB() :
     try :
         await UserFunctions.create_table()
+        await UserFunctions.clear_bkk_table()
+        await UserFunctions.fill_bkk_table("BKK/stops.txt")
         return False
     except Exception as e :
         print(f"Erreur de connexion à la base de données : {e}")

@@ -235,9 +235,7 @@ async function setMyLocation() {
         if (data.success) {
             const startInput = document.getElementById('start-address');
 
-            startInput.dataset.coordinates = data.latitude + ', ' + data.longitude;
-
-            startInput.value = '📍 Your location';
+           startInput.value = data.latitude + ', ' + data.longitude;
 
             startInput.style.fontWeight = '500';
 

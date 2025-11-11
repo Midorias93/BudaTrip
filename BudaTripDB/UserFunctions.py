@@ -36,7 +36,85 @@ async def create_table():
             password VARCHAR(100) NOT NULL
         )
     ''')
+    await conn.execute('''
+        CREATE TABLE IF NOT EXISTS bkk (
+      stop_id              VARCHAR(20) PRIMARY KEY,
+      stop_name            VARCHAR(100),
+      stop_lat             DOUBLE PRECISION,
+      stop_lon             DOUBLE PRECISION,
+      stop_code            VARCHAR(20),
+      location_type        VARCHAR(100),
+      location_sub_type    VARCHAR(100),
+      parent_station       VARCHAR(100),
+      wheelchair_boarding  INT
+        )
+    ''')
     print("Table 'users' créée ou déjà existante")
+    await close_pool(conn)
+
+
+# ==================== REMPLISSAGE DE LA TABLE BKK ====================
+
+async def fill_bkk_table(file_path: str = 'stops.txt') -> int:
+    conn = await init_pool()
+
+    try:
+        # Lire le fichier
+        with open(file_path, 'r', encoding='utf-8') as file:
+            # Ignorer la première ligne (en-têtes)
+            next(file)
+
+            records = []
+
+            for line in file:
+                # Enlever les espaces et sauts de ligne
+                line = line.strip()
+                if not line:
+                    continue
+
+                parts = line.split(',')
+                if len(parts) <= 9:
+
+                    stop_id = parts[0].strip()
+                    stop_name = parts[1].strip('"')
+                    stop_lat = float(parts[2]) if parts[2].strip() else None
+                    stop_lon = float(parts[3]) if parts[3].strip() else None
+                    stop_code = parts[4] if parts[4].strip() else None
+                    location_type = parts[5] if parts[5].strip() else None
+                    location_sub_type = parts[6] if parts[6].strip() else None
+                    parent_station = parts[7] if parts[7].strip() else None
+                    wheelchair_boarding = int(parts[8]) if parts[8].strip() else None
+
+                    records.append((
+                        stop_id,
+                        stop_name,
+                        stop_lat,
+                        stop_lon,
+                        stop_code,
+                        location_type,
+                        location_sub_type,
+                        parent_station,
+                        wheelchair_boarding
+                    ))
+
+            if records:
+                await conn.executemany('''
+                                       INSERT INTO bkk (stop_id, stop_name, stop_lat, stop_lon, stop_code,
+                                                        location_type, location_sub_type, parent_station,
+                                                        wheelchair_boarding)
+                                       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (stop_id) DO NOTHING
+                                       ''', records)
+            inserted_count = len(records)
+            await close_pool(conn)
+            return inserted_count
+    except Exception as e :
+        print("Le fichier n'existe pas", e)
+        await close_pool(conn)
+
+
+async def clear_bkk_table() :
+    conn = await init_pool()
+    await conn.execute('DELETE FROM bkk')
     await close_pool(conn)
 
 
