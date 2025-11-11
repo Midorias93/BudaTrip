@@ -3,6 +3,8 @@ from geopy.geocoders import Nominatim
 import json
 from math import radians, sin, cos, sqrt, atan2
 import geocoder
+from BudaTripDB import UserFunctions
+from BudaTripDB.UserFunctions import init_pool, close_pool
 
 
 def get_location():
@@ -78,3 +80,36 @@ def get_coordinates(address):
 
     except Exception as e:
         return f"Error: {e}"
+
+# ---- Nearest BKK stop utility ----
+
+async def find_nearest_bkk_stop(lat: float, lon: float):
+    """
+    Returns the nearest BKK stop from the GTFS stops table.
+    Expects a GTFS-like schema with columns: stop_id, stop_name, stop_lat, stop_lon.
+    """
+    cur = await init_pool()
+    cur.execute("""
+        SELECT stop_id, stop_name, stop_lat, stop_lon
+        FROM stops
+        WHERE stop_lat IS NOT NULL AND stop_lon IS NOT NULL
+    """)
+    nearest = None
+    best_dist = float("inf")
+    for row in cur.fetchall():
+        sid, name, s_lat, s_lon = row
+        try:
+            d = haversine_distance(lat, lon)
+        except Exception:
+            continue
+        if d < best_dist:
+            best_dist = d
+            nearest = {
+                "stop_id": sid,
+                "stop_name": name,
+                "stop_lat": float(s_lat),
+                "stop_lon": float(s_lon),
+                "distance_km": round(d, 3),
+            }
+    await close_pool()
+    return nearest

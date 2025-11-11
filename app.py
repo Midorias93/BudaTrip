@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, jsonify
 from AppFunctions import Itinerary, Location, Weather
 from BudaTripDB import UserFunctions
 import asyncio
-import asyncpg
 
 app = Flask(__name__)
 
@@ -639,6 +638,23 @@ def register():
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route("/api/bkk/nearest-stop", methods=["GET"])
+async def api_bkk_nearest_stop():
+    """
+    Query params:
+      - lat: float (required)
+      - lon: float (required)
+    Returns JSON with nearest stop.
+    """
+    lat,lon = Location.get_my_coordinates()
+    stop = await Location.find_nearest_bkk_stop(lat, lon)
+
+    if not stop:
+        return jsonify({"error": "No stop found in database"}), 404
+    return jsonify(stop), 200
+
 
 async def initDB() :
     try :

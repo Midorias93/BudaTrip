@@ -1,6 +1,6 @@
 folium
 requests
 geopy
-flask
+flask>=2.3
 geocoder
 asyncpg
