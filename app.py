@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request, jsonify
-from AppFunctions import Itinerary, Location, Weather
-from BudaTripDB import UserFunctions
+from Localisation import Itinerary, Location
+from Weather import Weather
+from DataBase import Tables, Users
+from DataBase.BKK import Stations
 import asyncio
-
+import psycopg2
+import os
 app = Flask(__name__)
 
 print("Dossiers static:", app.static_folder)
@@ -290,7 +293,7 @@ def create_user():
             }), 400
 
         # Créer l'utilisateur
-        user_id = asyncio.run(UserFunctions.create_user(nom, email, password))
+        user_id = asyncio.run(Users.create_user(nom, email, password))
 
         if user_id:
             return jsonify({
@@ -315,8 +318,8 @@ def get_all_users():
         limit = request.args.get('limit', default=100, type=int)
         offset = request.args.get('offset', default=0, type=int)
 
-        users = asyncio.run(UserFunctions.get_all_users(limit=limit, offset=offset))
-        total = asyncio.run(UserFunctions.count_users())
+        users = asyncio.run(Users.get_all_users(limit=limit, offset=offset))
+        total = asyncio.run(Users.count_users())
 
         return jsonify({
             'success': True,
@@ -334,7 +337,7 @@ def get_all_users():
 def get_user(user_id):
     """Récupère un utilisateur par son ID"""
     try:
-        user = asyncio.run(UserFunctions.get_user_by_id(user_id))
+        user = asyncio.run(Users.get_user_by_id(user_id))
 
         if user:
             return jsonify({
@@ -355,7 +358,7 @@ def get_user(user_id):
 def get_user_by_email(email):
     """Récupère un utilisateur par son email"""
     try:
-        user = asyncio.run(UserFunctions.get_user_by_email(email))
+        user = asyncio.run(Users.get_user_by_email(email))
 
         if user:
             return jsonify({
@@ -384,7 +387,7 @@ def search_users():
                 'error': 'Paramètre de recherche manquant (q)'
             }), 400
 
-        users = asyncio.run(UserFunctions.search_users_by_name(query))
+        users = asyncio.run(Users.search_users_by_name(query))
 
         return jsonify({
             'success': True,
@@ -408,14 +411,14 @@ def update_user(user_id):
         print(phone)
 
         # Vérifier si l'utilisateur existe
-        user = asyncio.run(UserFunctions.get_user_by_id(user_id))
+        user = asyncio.run(Users.get_user_by_id(user_id))
         if not user:
             return jsonify({
                 'success': False,
                 'error': 'Utilisateur non trouvé'
             }), 404
 
-        success = asyncio.run(UserFunctions.update_user(
+        success = asyncio.run(Users.update_user(
             user_id,
             nom=nom,
             email=email,
@@ -425,7 +428,7 @@ def update_user(user_id):
 
         if success:
             # Récupérer l'utilisateur mis à jour
-            updated_user = asyncio.run(UserFunctions.get_user_by_id(user_id))
+            updated_user = asyncio.run(Users.get_user_by_id(user_id))
             return jsonify({
                 'success': True,
                 'message': 'Utilisateur mis à jour avec succès',
@@ -454,7 +457,7 @@ def update_password(user_id):
                 'error': 'Le nouveau mot de passe est requis'
             }), 400
 
-        success = asyncio.run(UserFunctions.update_password(user_id, new_password))
+        success = asyncio.run(Users.update_password(user_id, new_password))
 
         if success:
             return jsonify({
@@ -475,7 +478,7 @@ def update_password(user_id):
 def delete_user(user_id):
     """Supprime un utilisateur"""
     try:
-        success = asyncio.run(UserFunctions.delete_user(user_id))
+        success = asyncio.run(Users.delete_user(user_id))
 
         if success:
             return jsonify({
@@ -496,7 +499,7 @@ def delete_user(user_id):
 def delete_user_by_email(email):
     """Supprime un utilisateur par email"""
     try:
-        success = asyncio.run(UserFunctions.delete_user_by_email(email))
+        success = asyncio.run(Users.delete_user_by_email(email))
 
         if success:
             return jsonify({
@@ -526,7 +529,7 @@ def check_email():
                 'error': 'Email requis'
             }), 400
 
-        exists = asyncio.run(UserFunctions.user_exists(email))
+        exists = asyncio.run(Users.user_exists(email))
 
         return jsonify({
             'success': True,
@@ -541,7 +544,7 @@ def check_email():
 def count_users():
     """Compte le nombre total d'utilisateurs"""
     try:
-        count = asyncio.run(UserFunctions.count_users())
+        count = asyncio.run(Users.count_users())
 
         return jsonify({
             'success': True,
@@ -567,7 +570,7 @@ def login():
             }), 400
 
         # Récupérer l'utilisateur
-        user = asyncio.run(UserFunctions.get_user_by_email(email))
+        user = asyncio.run(Users.get_user_by_email(email))
 
         if not user:
             return jsonify({
@@ -611,7 +614,7 @@ def register():
             }), 400
 
         # Vérifier si l'email existe déjà
-        exists = asyncio.run(UserFunctions.user_exists(email))
+        exists = asyncio.run(Users.user_exists(email))
         if exists:
             return jsonify({
                 'success': False,
@@ -619,10 +622,10 @@ def register():
             }), 409
 
         # Créer l'utilisateur (À AMÉLIORER avec bcrypt pour hasher le password!)
-        user_id = asyncio.run(UserFunctions.create_user(nom, email, password))
+        user_id = asyncio.run(Users.create_user(nom, email, password))
 
         if user_id:
-            user = asyncio.run(UserFunctions.get_user_by_id(user_id))
+            user = asyncio.run(Users.get_user_by_id(user_id))
             user_safe = {k: v for k, v in user.items() if k != 'password'}
 
             return jsonify({
@@ -639,17 +642,30 @@ def register():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+def get_bkk_db_conn():
+    return psycopg2.connect(
+        host=os.getenv("POSTGRES_HOST", "localhost"),
+        port=os.getenv("POSTGRES_PORT", "5432"),
+        user=os.getenv("POSTGRES_USER", "BudaTrip"),
+        password=os.getenv("POSTGRES_PASSWORD", "1234"),
+        dbname=os.getenv("POSTGRES_DB", "BudaTripDB"),
+    )
 
 @app.route("/api/bkk/nearest-stop", methods=["GET"])
-async def api_bkk_nearest_stop():
+def api_bkk_nearest_stop():
     """
     Query params:
       - lat: float (required)
       - lon: float (required)
     Returns JSON with nearest stop.
     """
-    lat,lon = Location.get_my_coordinates()
-    stop = await Location.find_nearest_bkk_stop(lat, lon)
+    lat, lon = Location.get_my_coordinates()
+    conn = get_bkk_db_conn()
+    try:
+        stop = Location.find_nearest_bkk_stop(conn, lat, lon)
+        print(stop)
+    finally:
+        conn.close()
 
     if not stop:
         return jsonify({"error": "No stop found in database"}), 404
@@ -658,9 +674,9 @@ async def api_bkk_nearest_stop():
 
 async def initDB() :
     try :
-        await UserFunctions.create_table()
-        await UserFunctions.clear_bkk_table()
-        await UserFunctions.fill_bkk_table("BKK/stops.txt")
+        await Tables.create_table()
+        await Stations.clear_bkk_table()
+        await Stations.fill_bkk_table("DataBase/BKK/stops.txt")
         return False
     except Exception as e :
         print(f"Erreur de connexion à la base de données : {e}")

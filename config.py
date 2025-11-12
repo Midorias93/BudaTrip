@@ -1,1 +1,0 @@
-BKK_API_KEY = "61f16316-3fac-4cd7-a4f0-77feac9976ab"

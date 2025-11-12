@@ -740,3 +740,44 @@ function handleLogout() {
 }
 
 checkUserSession();
+
+// ============================================
+// BKK STATION
+// ============================================
+
+
+async function findNearestBkkStop() {
+  const resBox = document.getElementById('bkk-nearest-result');
+  const textEl = document.getElementById('bkk-nearest-text');
+
+  resBox.style.display = 'block';
+  textEl.textContent = 'Recherche…';
+
+  try {
+    const res = await fetch('/api/bkk/nearest-stop', { headers: { 'Accept': 'application/json' } });
+    const data = await res.json();
+
+    // On affiche uniquement: nom, id, lat, lon distance
+    const name = data.stop_name;
+    const id = data.stop_id;
+    const lat = data.stop_lat;
+    const lon = data.stop_lon;
+    const distance = data.distance_km
+
+      const stationMarker = L.marker([lat, lon], { icon: stationIcon })
+          .addTo(map)
+          .bindPopup(`<b>${name}</b><br>Distance: ${distance} km`)
+          .openPopup();
+      markers.push(stationMarker);
+
+
+
+    textEl.textContent = `Nom: ${name} | ID: ${id} | Lat: ${lat} | Lon: ${lon} | distance: ${distance}`;
+  } catch (e) {
+    textEl.textContent = "Erreur lors de la récupération de l'arrêt.";
+  }
+}
+
+document.getElementById('bkk-nearest-btn')?.addEventListener('click', findNearestBkkStop);
+
+
