@@ -30,7 +30,7 @@ async def initDB():
     try:
         await Tables.create_table()
         await Stations.clear_bkk_table()
-        await Stations.fill_bkk_table("DataBase/BKK/stops.txt")
+        await Stations.fill_bkk_table()
         return False
     except Exception as e:
         print(f"Erreur de connexion à la base de données : {e}")

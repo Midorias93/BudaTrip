@@ -14,6 +14,7 @@ export async function findNearestBkkStop() {
         });
         const data = await res.json();
 
+
         const { stop_name, stop_id, stop_lat, stop_lon, distance_km } = data;
 
         const stationMarker = addMarker(stop_lat, stop_lon, stationIcon,

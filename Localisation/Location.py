@@ -3,6 +3,7 @@ from geopy.geocoders import Nominatim
 import json
 from math import radians, sin, cos, sqrt, atan2
 import geocoder
+from DataBase import Tables
 
 
 def get_location():
@@ -59,8 +60,6 @@ def find_nearest_station(coordinates, stations):
     return nearest
 
 
-
-
 def get_coordinates(address):
     geolocator = Nominatim(user_agent="mon_application")
 
@@ -80,29 +79,29 @@ def get_coordinates(address):
         return f"Error: {e}"
 
 
-def find_nearest_bkk_stop(conn, lat: float, lon: float):
+async def find_nearest_bkk_stop(lat, lon):
     """
     Returns the nearest BKK stop from the GTFS stops table.
     Expects a GTFS-like schema with columns: stop_id, stop_name, stop_lat, stop_lon.
     """
-    cur = conn.cursor()
-    cur.execute("""
+    conn = await Tables.init_pool()
+    rows = await conn.fetch("""
         SELECT stop_id, stop_name, stop_lat, stop_lon
         FROM bkk 
         WHERE stop_lat IS NOT NULL AND stop_lon IS NOT NULL
     """)
-    nearest = None
-    best_dist = float("inf")
-    for row in cur.fetchall():
-        sid, name, s_lat, s_lon = row
-        d = haversine_distance((lat, lon), (s_lat, s_lon))
-        if d < best_dist:
-            best_dist = d
-            nearest = {
-                "stop_id": sid,
-                "stop_name": name,
-                "stop_lat": float(s_lat),
-                "stop_lon": float(s_lon),
-                "distance_km": round(d, 3),
-            }
-    return nearest
+
+    stops = [dict(rows) for rows in rows]
+
+    nearest_stop = None
+    min_distance = float('inf')
+    user_coords = (lat, lon)
+    for stop in stops:
+        stop_coords = (stop['stop_lat'], stop['stop_lon'])
+        distance = haversine_distance(user_coords, stop_coords)
+        if distance < min_distance:
+            min_distance = distance
+            nearest_stop = stop
+
+    await Tables.close_pool(conn)
+    return nearest_stop

@@ -1,58 +1,68 @@
 from DataBase import Tables
+import csv
 
-async def fill_bkk_table(file_path: str = 'stops.txt') -> int:
+async def fill_bkk_table():
+    """Remplit la table bkk_stops avec les données du fichier stops.txt"""
     conn = await Tables.init_pool()
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            next(file)
+        # Vider la table avant de la remplir
+        await conn.execute("TRUNCATE TABLE bkk;")
 
-            records = []
+        # Lire le fichier avec le module csv qui gère les guillemets
+        with open('DataBase/BKK/stops.txt', 'r', encoding='utf-8') as f:
+            csv_reader = csv.DictReader(f)
 
-            for line in file:
-                line = line.strip()
-                if not line:
-                    continue
+            for row in csv_reader:
+                await conn.execute("""
+                    INSERT INTO bkk( 
+                        stop_id, stop_code, stop_name, stop_lat, stop_lon,
+                        zone_id, stop_url, location_type, parent_station,
+                        stop_desc, stop_timezone, wheelchair_boarding,
+                        level_id, platform_code
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+                """,
+                    row['stop_id'],
+                    row['stop_code'] or None,
+                    row['stop_name'],
+                    float(row['stop_lat']) if row['stop_lat'] else None,
+                    float(row['stop_lon']) if row['stop_lon'] else None,
+                    row['zone_id'] or None,
+                    row['stop_url'] or None,
+                    int(row['location_type']) if row['location_type'] else 0,
+                    row['parent_station'] or None,
+                    row['stop_desc'] or None,
+                    row['stop_timezone'] or None,
+                    int(row['wheelchair_boarding']) if row['wheelchair_boarding'] else None,
+                    row['level_id'] or None,
+                    row['platform_code'] or None
+                )
 
-                parts = line.split(',')
-                if len(parts) <= 9:
+        print(f"Table bkk_stops remplie avec succès")
 
-                    stop_id = parts[0].strip()
-                    stop_name = parts[1].strip('"')
-                    stop_lat = float(parts[2]) if parts[2].strip() else None
-                    stop_lon = float(parts[3]) if parts[3].strip() else None
-                    stop_code = parts[4] if parts[4].strip() else None
-                    location_type = parts[5] if parts[5].strip() else None
-                    location_sub_type = parts[6] if parts[6].strip() else None
-                    parent_station = parts[7] if parts[7].strip() else None
-                    wheelchair_boarding = int(parts[8]) if parts[8].strip() else None
-
-                    records.append((
-                        stop_id,
-                        stop_name,
-                        stop_lat,
-                        stop_lon,
-                        stop_code,
-                        location_type,
-                        location_sub_type,
-                        parent_station,
-                        wheelchair_boarding
-                    ))
-
-            if records:
-                await conn.executemany('''
-                                       INSERT INTO bkk (stop_id, stop_name, stop_lat, stop_lon, stop_code,
-                                                        location_type, location_sub_type, parent_station,
-                                                        wheelchair_boarding)
-                                       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (stop_id) DO NOTHING
-                                       ''', records)
-            inserted_count = len(records)
-            await Tables.close_pool(conn)
-            return inserted_count
-    except Exception as e :
-        print("File does not exist", e)
+    except Exception as e:
+        print(f"Erreur lors du remplissage: {e}")
+        raise
+    finally:
         await Tables.close_pool(conn)
 
+async def get_all_bkk_stations():
+    conn = await Tables.init_pool()
+    rows = await conn.fetch('SELECT * FROM bkk')
+    await Tables.close_pool(conn)
+    return [dict(row) for row in rows]
+
+async def get_bkk_station_by_stop_id(stop_id):
+    conn = await Tables.init_pool()
+    row = await conn.fetchrow('SELECT * FROM bkk WHERE stop_id = $1', stop_id)
+    await Tables.close_pool(conn)
+    return dict(row) if row else None
+
+async def get_bkk_station_by_name(name):
+    conn = await Tables.init_pool()
+    row = await conn.fetchrow('SELECT * FROM bkk WHERE stop_name = $1', name)
+    await Tables.close_pool(conn)
+    return dict(row) if row else None
 
 async def clear_bkk_table() :
     conn = await Tables.init_pool()
