@@ -3,9 +3,9 @@ import asyncpg
 DB_CONFIG = {
     'host': 'localhost',
     'port': 5432,
-    'user': 'BudaTrip',
+    'user': 'romain',
     'password': '1234',
-    'database': 'BudaTripDB'
+    'database': 'bt_db'
 }
 
 
