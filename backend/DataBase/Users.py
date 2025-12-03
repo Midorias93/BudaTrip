@@ -63,7 +63,7 @@ def get_all_users(limit=100, offset=0):
 
 def search_users_by_name(name):
     """Search users by name (case insensitive)"""
-    users = User.select().where(User.name.contains(name))
+    users = User.select().where(User.name ** f'%{name}%')
     return [
         {
             'id': user.id,

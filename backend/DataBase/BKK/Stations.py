@@ -1,4 +1,5 @@
 from DataBase.models import BKKStation
+from peewee import DoesNotExist
 import csv
 
 
@@ -92,7 +93,7 @@ def get_bkk_station_by_stop_id(stop_id):
             'platform_code': station.platform_code,
             'location_sub_type': station.location_sub_type
         }
-    except BKKStation.DoesNotExist:
+    except DoesNotExist:
         return None
 
 
@@ -117,7 +118,7 @@ def get_bkk_station_by_name(name):
             'platform_code': station.platform_code,
             'location_sub_type': station.location_sub_type
         }
-    except BKKStation.DoesNotExist:
+    except DoesNotExist:
         return None
 
 
