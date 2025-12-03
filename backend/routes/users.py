@@ -197,12 +197,12 @@ def delete_user(user_id):
         if success:
             return jsonify({
                 'success': True,
-                'message': 'Utilisateur supprimé avec succès'
+                'message': 'User deleted successfully'
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'Utilisateur non trouvé'
+                'error': 'User not found'
             }), 404
 
     except Exception as e:

@@ -28,7 +28,7 @@ export async function showAllStations() {
             const bounds = L.latLngBounds(data.stations.map(s => [s.lat, s.lon]));
             map.fitBounds(bounds, { padding: [50, 50] });
         } else {
-            showError('Impossible to load stations');
+            showError('Unable to load stations');
         }
     } catch (error) {
         showError('Error : ' + error.message);
@@ -46,7 +46,7 @@ export async function findNearestStation() {
         const locationData = await locationResponse.json();
 
         if (!locationData.success) {
-            showError('Impossible to get your location');
+            showError('Unable to get your location');
             return;
         }
 

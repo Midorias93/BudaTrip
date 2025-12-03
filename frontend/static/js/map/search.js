@@ -52,7 +52,7 @@ export async function getMyLocation() {
             const marker = addMarker(latitude, longitude, null, '<b>Your Position</b>');
             marker.openPopup();
         } else {
-            showError('Impossible to get your location');
+            showError('Unable to get your location');
         }
     } catch (error) {
         showError('Error : ' + error.message);

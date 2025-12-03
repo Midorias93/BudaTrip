@@ -43,9 +43,9 @@ export async function initializeUserPosition() {
         if (data.success) {
             const { latitude, longitude } = data;
             map.setView([latitude, longitude], 15);
-            console.log(`Position trouvée: ${latitude}, ${longitude}`);
+            console.log(`Position found: ${latitude}, ${longitude}`);
         } else {
-            console.warn('Impossible to get user location, defaulting to Budapest');
+            console.warn('Unable to get user location, defaulting to Budapest');
         }
     } catch (error) {
         console.error('Error while get position', error);
