@@ -1,2 +1,11 @@
 .idea
 .DB_Store
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+ENV/
+env/
+.env
