@@ -4,8 +4,14 @@ from routes import register_blueprints
 from DataBase import Tables
 from DataBase.BKK import Stations
 import asyncio
+import os
 
-app = Flask(__name__)
+# Configure Flask to use frontend directories
+frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frontend')
+static_dir = os.path.join(frontend_dir, 'static')
+template_dir = os.path.join(frontend_dir, 'templates')
+
+app = Flask(__name__, static_folder=static_dir, template_folder=template_dir)
 app.config.from_object(Config)
 
 # Enregistrer tous les blueprints
@@ -21,8 +27,7 @@ def hello_world():
 
 @app.route('/test-static')
 def test_static():
-    import os
-    static_path = os.path.join(app.root_path, 'static', 'css', 'style.css')
+    static_path = os.path.join(app.static_folder, 'css', 'style.css')
     exists = os.path.exists(static_path)
     return f"Fichier existe: {exists}<br>Chemin: {static_path}"
 
