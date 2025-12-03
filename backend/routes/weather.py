@@ -10,6 +10,6 @@ def get_weather():
         if weather:
             return jsonify({'success': True, 'weather': weather}), 200
         else:
-            return jsonify({'success': False, 'error': 'Impossible to get weather data'}), 404
+            return jsonify({'success': False, 'error': 'Unable to get weather data'}), 404
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500

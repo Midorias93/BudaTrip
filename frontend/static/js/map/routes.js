@@ -24,7 +24,7 @@ export async function calculateRoute() {
         ]);
 
         if (!startData.success || !endData.success) {
-            showError('Impossible to find addresses');
+            showError('Unable to find addresses');
             return;
         }
 
@@ -82,7 +82,7 @@ async function calculateSimpleRoute(startCoords, endCoords) {
     if (data.success) {
         displaySimpleRoute(data.route);
     } else {
-        showError('Impossible to calculate the route');
+        showError('Unable to calculate the route');
     }
 }
 
@@ -102,7 +102,7 @@ async function calculateRouteWithStations(startCoords, endCoords) {
     if (data.success) {
         displayRouteWithStations(data);
     } else {
-        showError('Impossible to calculate the route');
+        showError('Unable to calculate the route');
     }
 }
 

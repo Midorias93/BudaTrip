@@ -26,10 +26,10 @@ function checkAuth() {
 
 function formatFrenchPhone(raw) {
     if (!raw) return '';
-    let digits = String(raw).replace(/\D/g, ''); // garder seulement les chiffres
-    if (digits.startsWith('33')) digits = digits.slice(2); // retirer indicatif FR si présent
-    if (digits.startsWith('0')) digits = digits.slice(1); // retirer le 0 national
-    digits = digits.slice(0, 9); // garder au maximum 9 chiffres (format national sans le 0)
+    let digits = String(raw).replace(/\D/g, ''); // keep only digits
+    if (digits.startsWith('33')) digits = digits.slice(2); // remove FR country code if present
+    if (digits.startsWith('0')) digits = digits.slice(1); // remove national 0
+    digits = digits.slice(0, 9); // keep at most 9 digits (national format without 0)
 
     const parts = [];
     if (digits.length > 0) parts.push(digits.slice(0, 1));
@@ -48,10 +48,10 @@ function loadUserData() {
 
     const userData = JSON.parse(user);
 
-    document.getElementById('sidebar-name').textContent = userData.nom || 'User';
+    document.getElementById('sidebar-name').textContent = userData.name || 'User';
     document.getElementById('sidebar-email').textContent = userData.email;
 
-    document.getElementById('name').value = userData.nom || '';
+    document.getElementById('name').value = userData.name || '';
     document.getElementById('email-profile').value = userData.email;
     phone = userData.phone || '';
     phone = formatFrenchPhone(phone);
@@ -125,7 +125,7 @@ async function updateProfile(event) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                nom: name,
+                name: name,
                 email: email,
                 phone: phone
             })
@@ -141,7 +141,7 @@ async function updateProfile(event) {
 
         const updatedUser = {
             ...user,
-            nom: name,
+            name: name,
             email: email,
             phone: phone
         };

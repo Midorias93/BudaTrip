@@ -11,8 +11,8 @@ def get_location():
         return {
             'latitude': g.latlng[0] if g.latlng else None,
             'longitude': g.latlng[1] if g.latlng else None,
-            'ville': g.city,
-            'pays': g.country
+            'city': g.city,
+            'country': g.country
         }
 
 
@@ -23,7 +23,7 @@ def bubi_location():
         "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/bicycle-rental.json?key=bkk-web&version=4").__dict__
     content = response['_content']
 
-    data_decode = content.decode('utf-8')  # utf-8 est le plus courant
+    data_decode = content.decode('utf-8')  # utf-8 is the most common
 
     data = json.loads(data_decode)['data']['list']
     Stations = {}
@@ -61,7 +61,7 @@ def find_nearest_station(coordinates, stations):
 
 
 def get_coordinates(address):
-    geolocator = Nominatim(user_agent="mon_application")
+    geolocator = Nominatim(user_agent="my_application")
 
     try:
         location = geolocator.geocode(address)

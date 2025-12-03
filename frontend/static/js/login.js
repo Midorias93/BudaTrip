@@ -113,13 +113,13 @@ async function handleLogin(event) {
 async function handleSignup(event) {
     event.preventDefault();
 
-    const nom = document.getElementById('nom').value;
+    const name = document.getElementById('name').value;
     const email = document.getElementById('email').value.toLowerCase();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
 
     // Validation
-    if (!nom || !email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
         showError('Please fill in all fields');
         return;
     }
@@ -137,7 +137,7 @@ async function handleSignup(event) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ nom, email, password })
+            body: JSON.stringify({ name, email, password })
         });
 
         const data = await response.json();

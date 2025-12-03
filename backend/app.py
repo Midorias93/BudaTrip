@@ -14,7 +14,7 @@ template_dir = os.path.join(frontend_dir, 'templates')
 app = Flask(__name__, static_folder=static_dir, template_folder=template_dir)
 app.config.from_object(Config)
 
-# Enregistrer tous les blueprints
+# Register all blueprints
 register_blueprints(app)
 
 @app.route('/')
@@ -29,7 +29,7 @@ def hello_world():
 def test_static():
     static_path = os.path.join(app.static_folder, 'css', 'style.css')
     exists = os.path.exists(static_path)
-    return f"Fichier existe: {exists}<br>Chemin: {static_path}"
+    return f"File exists: {exists}<br>Path: {static_path}"
 
 async def initDB():
     try:
@@ -38,7 +38,7 @@ async def initDB():
         await Stations.fill_bkk_table()
         return False
     except Exception as e:
-        print(f"Erreur de connexion à la base de données : {e}")
+        print(f"Database connection error: {e}")
         return True
 
 if asyncio.run(initDB()):

@@ -18,7 +18,7 @@ export async function showAllWeather() {
             window.currentWeather = { precipitation, temperature, wind_speed };
         }
     } catch (error) {
-        console.error('Erreur météo:', error);
+        console.error('Weather error:', error);
         document.getElementById('temp').textContent = 'N/A';
         document.getElementById('wind').textContent = 'N/A';
         document.getElementById('precipitation').textContent = 'N/A';

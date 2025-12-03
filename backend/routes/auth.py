@@ -24,17 +24,17 @@ def login():
         password = data.get('password')
 
         if not email or not password:
-            return jsonify({'success': False, 'error': 'Email et password requis'}), 400
+            return jsonify({'success': False, 'error': 'Email and password are required'}), 400
 
         user = asyncio.run(Users.get_user_by_email(email))
         if not user:
-            return jsonify({'success': False, 'error': 'Email ou mot de passe incorrect'}), 401
+            return jsonify({'success': False, 'error': 'Incorrect email or password'}), 401
 
         if user['password'] == password:
             user_safe = {k: v for k, v in user.items() if k != 'password'}
-            return jsonify({'success': True, 'message': 'Connexion réussie', 'user': user_safe}), 200
+            return jsonify({'success': True, 'message': 'Login successful', 'user': user_safe}), 200
         else:
-            return jsonify({'success': False, 'error': 'Email ou mot de passe incorrect'}), 401
+            return jsonify({'success': False, 'error': 'Incorrect email or password'}), 401
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -43,24 +43,24 @@ def login():
 def register():
     try:
         data = request.json
-        nom = data.get('nom')
+        name = data.get('name')
         email = data.get('email')
         password = data.get('password')
 
         if not email or not password:
-            return jsonify({'success': False, 'error': 'Email et password requis'}), 400
+            return jsonify({'success': False, 'error': 'Email and password are required'}), 400
 
         exists = asyncio.run(Users.user_exists(email))
         if exists:
-            return jsonify({'success': False, 'error': 'Cet email est déjà utilisé'}), 409
+            return jsonify({'success': False, 'error': 'This email is already in use'}), 409
 
-        user_id = asyncio.run(Users.create_user(nom, email, password))
+        user_id = asyncio.run(Users.create_user(name, email, password))
         if user_id:
             user = asyncio.run(Users.get_user_by_id(user_id))
             user_safe = {k: v for k, v in user.items() if k != 'password'}
-            return jsonify({'success': True, 'message': 'Inscription réussie', 'user': user_safe}), 201
+            return jsonify({'success': True, 'message': 'Registration successful', 'user': user_safe}), 201
         else:
-            return jsonify({'success': False, 'error': 'Erreur lors de l\'inscription'}), 500
+            return jsonify({'success': False, 'error': 'Error during registration'}), 500
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500

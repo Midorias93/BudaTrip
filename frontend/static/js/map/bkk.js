@@ -6,7 +6,7 @@ export async function findNearestBkkStop() {
     const textEl = document.getElementById('bkk-nearest-text');
 
     resBox.style.display = 'block';
-    textEl.textContent = 'Recherche…';
+    textEl.textContent = 'Searching…';
 
     try {
         const res = await fetch('/api/bkk/nearest-stop', {
@@ -21,8 +21,8 @@ export async function findNearestBkkStop() {
             `<b>${stop_name}</b><br>Distance: ${distance_km} km`);
         stationMarker.openPopup();
 
-        textEl.textContent = `Nom: ${stop_name} | ID: ${stop_id} | Lat: ${stop_lat} | Lon: ${stop_lon} | distance: ${distance_km}`;
+        textEl.textContent = `Name: ${stop_name} | ID: ${stop_id} | Lat: ${stop_lat} | Lon: ${stop_lon} | distance: ${distance_km}`;
     } catch (e) {
-        textEl.textContent = "Erreur lors de la récupération de l'arrêt.";
+        textEl.textContent = "Error while fetching the stop.";
     }
 }
