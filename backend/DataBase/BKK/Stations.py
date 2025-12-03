@@ -2,14 +2,14 @@ from DataBase import Tables
 import csv
 
 async def fill_bkk_table():
-    """Remplit la table bkk_stops avec les données du fichier stops.txt"""
+    """Fills the bkk_stops table with data from the stops.txt file"""
     conn = await Tables.init_pool()
 
     try:
-        # Vider la table avant de la remplir
+        # Empty the table before filling it
         await conn.execute("TRUNCATE TABLE bkk;")
 
-        # Lire le fichier avec le module csv qui gère les guillemets
+        # Read the file with the csv module which handles quotes
         with open('DataBase/BKK/stops.txt', 'r', encoding='utf-8') as f:
             csv_reader = csv.DictReader(f)
 
@@ -38,10 +38,10 @@ async def fill_bkk_table():
                     row['platform_code'] or None
                 )
 
-        print(f"Table bkk_stops remplie avec succès")
+        print(f"Table bkk_stops filled successfully")
 
     except Exception as e:
-        print(f"Erreur lors du remplissage: {e}")
+        print(f"Error during filling: {e}")
         raise
     finally:
         await Tables.close_pool(conn)

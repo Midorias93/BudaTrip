@@ -9,27 +9,27 @@ DB_CONFIG = {
 }
 
 
-# ==================== GESTION DU POOL ====================
+# ==================== POOL MANAGEMENT ====================
 
 async def init_pool(min_size: int = 10, max_size: int = 20):
     pool = await asyncpg.create_pool(**DB_CONFIG, min_size=min_size, max_size=max_size)
-    print("Pool de connexions initialisé")
+    print("Connection pool initialized")
     return pool
 
 
 async def close_pool(pool):
     await pool.close()
-    print("Pool de connexions fermé")
+    print("Connection pool closed")
 
 
-# ==================== CRÉATION DE TABLE ====================
+# ==================== TABLE CREATION ====================
 
 async def create_table():
     conn = await init_pool()
     await conn.execute('''
                        CREATE TABLE IF NOT EXISTS users (
                                                             id SERIAL PRIMARY KEY,
-                                                            nom VARCHAR(100),
+                                                            name VARCHAR(100),
                            email VARCHAR(100) UNIQUE,
                            phone VARCHAR(12) UNIQUE,
                            password VARCHAR(100) NOT NULL
@@ -54,5 +54,5 @@ async def create_table():
                            wheelchair_boarding  INT
                            )
                        ''')
-    print("Table 'users' créée ou déjà existante")
+    print("Table 'users' created or already exists")
     await close_pool(conn)

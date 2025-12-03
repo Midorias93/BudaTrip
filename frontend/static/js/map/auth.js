@@ -13,7 +13,7 @@ function showUserMenu(userData) {
     document.getElementById('auth-bar-guest').style.display = 'none';
     document.getElementById('auth-bar-user').style.display = 'flex';
 
-    const userName = userData.nom || userData.email.split('@')[0];
+    const userName = userData.name || userData.email.split('@')[0];
     document.getElementById('user-name').textContent = userName;
 }
 

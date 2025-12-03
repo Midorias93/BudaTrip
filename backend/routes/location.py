@@ -60,7 +60,7 @@ def nearest_station():
                 'station': {'name': name, 'lat': coords[0], 'lon': coords[1], 'distance': round(distance, 2)}
             })
         else:
-            return jsonify({'success': False, 'error': 'Aucune station trouvée'}), 404
+            return jsonify({'success': False, 'error': 'No station found'}), 404
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -85,7 +85,7 @@ def calculate_route():
                 }
             })
         else:
-            return jsonify({'success': False, 'error': 'Impossible de calculer l\'itinéraire'}), 404
+            return jsonify({'success': False, 'error': 'Unable to calculate route'}), 404
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -104,7 +104,7 @@ def route_with_stations():
         end_station = Location.find_nearest_station((end_lat, end_lon), stations)
 
         if not start_station or not end_station:
-            return jsonify({'success': False, 'error': 'Stations non trouvées'}), 404
+            return jsonify({'success': False, 'error': 'Stations not found'}), 404
 
         start_station_name, start_station_coords, start_distance = start_station
         end_station_name, end_station_coords, end_distance = end_station

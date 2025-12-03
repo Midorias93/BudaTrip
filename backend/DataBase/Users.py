@@ -1,21 +1,21 @@
 from DataBase import Tables
 import asyncpg
 
-async def create_user(nom, email, password):
+async def create_user(name, email, password):
     conn = await Tables.init_pool()
     try:
         row = await conn.fetchrow(
-            'INSERT INTO users (nom, email, password) VALUES ($1, $2, $3) RETURNING id',
-            nom, email, password
+            'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id',
+            name, email, password
         )
         await Tables.close_pool(conn)
         return row['id']
     except asyncpg.UniqueViolationError:
-        print(f"Erreur : L'email {email} existe déjà")
+        print(f"Error: Email {email} already exists")
         await Tables.close_pool(conn)
         return None
 
-# ==================== OPÉRATIONS READ ====================
+# ==================== READ OPERATIONS ====================
 
 async def get_user_by_id(user_id):
     conn = await Tables.init_pool()
@@ -38,11 +38,11 @@ async def get_all_users(limit = 100, offset = 0):
     return [dict(row) for row in rows]
 
 
-async def search_users_by_name(nom):
+async def search_users_by_name(name):
     conn = await Tables.init_pool()
     rows = await conn.fetch(
-        'SELECT * FROM users WHERE nom ILIKE $1',
-        f'%{nom}%'
+        'SELECT * FROM users WHERE name ILIKE $1',
+        f'%{name}%'
     )
     await Tables.close_pool(conn)
     return [dict(row) for row in rows]
@@ -65,16 +65,16 @@ async def user_exists(email):
     return exists
 
 
-# ==================== OPÉRATIONS UPDATE ====================
+# ==================== UPDATE OPERATIONS ====================
 
-async def update_user(user_id, nom = None, email = None, password = None, phone = None):
+async def update_user(user_id, name = None, email = None, password = None, phone = None):
     updates = []
     values = []
     param_count = 1
 
-    if nom is not None:
-        updates.append(f'nom = ${param_count}')
-        values.append(nom)
+    if name is not None:
+        updates.append(f'name = ${param_count}')
+        values.append(name)
         param_count += 1
 
     if email is not None:
@@ -104,7 +104,7 @@ async def update_user(user_id, nom = None, email = None, password = None, phone 
         await Tables.close_pool(conn)
         return result.endswith('1')
     except asyncpg.UniqueViolationError:
-        print(f"Erreur : L'email {email} existe déjà")
+        print(f"Error: Email {email} already exists")
         await Tables.close_pool(conn)
         return False
 
@@ -149,7 +149,7 @@ async def transfer_user_data(old_email, new_email):
     conn = await Tables.init_pool()
     async with conn.transaction():
         try:
-            # Vérifie que l'ancien email existe
+            # Check that the old email exists
             exists = await conn.fetchval(
                 'SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)',
                 old_email
@@ -158,7 +158,7 @@ async def transfer_user_data(old_email, new_email):
                 await Tables.close_pool(conn)
                 return False
 
-            # Met à jour l'email
+            # Update the email
             result = await conn.execute(
                 'UPDATE users SET email = $1 WHERE email = $2',
                 new_email, old_email
@@ -166,6 +166,6 @@ async def transfer_user_data(old_email, new_email):
             await Tables.close_pool(conn)
             return result.endswith('1')
         except asyncpg.UniqueViolationError:
-            print(f"Erreur : L'email {new_email} existe déjà")
+            print(f"Error: Email {new_email} already exists")
             await Tables.close_pool(conn)
             return False
