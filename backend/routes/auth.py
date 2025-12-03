@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request, render_template
 from DataBase import Users
-import asyncio
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -26,7 +25,7 @@ def login():
         if not email or not password:
             return jsonify({'success': False, 'error': 'Email and password are required'}), 400
 
-        user = asyncio.run(Users.get_user_by_email(email))
+        user = Users.get_user_by_email(email)
         if not user:
             return jsonify({'success': False, 'error': 'Incorrect email or password'}), 401
 
@@ -50,13 +49,13 @@ def register():
         if not email or not password:
             return jsonify({'success': False, 'error': 'Email and password are required'}), 400
 
-        exists = asyncio.run(Users.user_exists(email))
+        exists = Users.user_exists(email)
         if exists:
             return jsonify({'success': False, 'error': 'This email is already in use'}), 409
 
-        user_id = asyncio.run(Users.create_user(name, email, password))
+        user_id = Users.create_user(name, email, password)
         if user_id:
-            user = asyncio.run(Users.get_user_by_id(user_id))
+            user = Users.get_user_by_id(user_id)
             user_safe = {k: v for k, v in user.items() if k != 'password'}
             return jsonify({'success': True, 'message': 'Registration successful', 'user': user_safe}), 201
         else:
