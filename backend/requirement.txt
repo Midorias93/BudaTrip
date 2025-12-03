@@ -3,5 +3,5 @@ requests
 geopy
 flask
 geocoder
-asyncpg
+peewee
 psycopg2-binary>=2.9

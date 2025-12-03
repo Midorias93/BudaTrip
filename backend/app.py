@@ -1,9 +1,8 @@
 from flask import Flask, render_template
 from config import Config
 from routes import register_blueprints
-from DataBase import Tables
+from DataBase.models import initialize_database, close_database
 from DataBase.BKK import Stations
-import asyncio
 import os
 
 # Configure Flask to use frontend directories
@@ -31,17 +30,17 @@ def test_static():
     exists = os.path.exists(static_path)
     return f"File exists: {exists}<br>Path: {static_path}"
 
-async def initDB():
+def initDB():
     try:
-        await Tables.create_table()
-        await Stations.clear_bkk_table()
-        await Stations.fill_bkk_table()
+        initialize_database()
+        Stations.clear_bkk_table()
+        Stations.fill_bkk_table()
         return False
     except Exception as e:
         print(f"Database connection error: {e}")
         return True
 
-if asyncio.run(initDB()):
+if initDB():
     exit(1)
 
 if __name__ == '__main__':
