@@ -1,4 +1,4 @@
-from peewee import AutoField, DateTimeField, IntegerField, CharField
+from peewee import AutoField, DateTimeField, IntegerField, DoubleField
 from backend.entities.models.BaseModel import BaseModel
 
 class Weather(BaseModel):
@@ -8,9 +8,8 @@ class Weather(BaseModel):
     temperature = IntegerField(null=True)
     precipitation = IntegerField(null=True)
     windSpeed = IntegerField(null=True)
-    # Storing position as "lat,lon" string format, as Peewee doesn't have Pair type
-    # Alternative: use separate latitude/longitude fields
-    position = CharField(max_length=50, null=False)  # Format: "lat,lon"
+    position_lat = DoubleField(null=False)
+    position_lon = DoubleField(null=False)
 
     class Meta:
         table_name = 'weather'

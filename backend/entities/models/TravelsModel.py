@@ -1,7 +1,7 @@
 from enum import Enum
 from peewee import (
     AutoField,
-    DateTimeField,
+    IntegerField,
     DoubleField,
     CharField,
     BigIntegerField,
@@ -28,16 +28,16 @@ class Travel(BaseModel):
     """Travel model representing the travel table"""
     id = AutoField(primary_key=True)
     user_id = ForeignKeyField(User, backref='travels', null=False, on_delete='CASCADE')
-    duration = DateTimeField(null=True)  # Using DateTimeField for Instant
+    duration = IntegerField(null=True)  # Duration in seconds
     distance = DoubleField(null=True)
-    # Storing positions as "lat,lon" string format
-    startPosition = CharField(max_length=50, null=True)  # Format: "lat,lon"
-    endPosition = CharField(max_length=50, null=True)  # Format: "lat,lon"
+    start_lat = DoubleField(null=True)
+    start_lon = DoubleField(null=True)
+    end_lat = DoubleField(null=True)
+    end_lon = DoubleField(null=True)
     transportType = CharField(max_length=20, null=True)  # Storing enum as string
     cost = BigIntegerField(null=True)
     CO2Emissions = BigIntegerField(null=True)
     weather_id = ForeignKeyField(Weather, backref='travels', null=True, on_delete='SET NULL')
-    # Using DeferredForeignKey to avoid circular import with PassesModel
     pass_id = DeferredForeignKey('Pass', backref='travels', null=True, on_delete='SET NULL')
 
     class Meta:

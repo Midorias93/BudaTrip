@@ -20,8 +20,6 @@ class Pass(BaseModel):
     type = CharField(max_length=20, null=False)  # Storing enum as string
     price = DoubleField(null=False)
     user_id = ForeignKeyField(User, backref='passes', null=False, on_delete='CASCADE')
-    # Note: OneToMany relationship to Travel is handled through a backref in Travel model
-    # The Travel model should have a foreign key to Pass, which we'll need to add
 
     class Meta:
         table_name = 'passes'
