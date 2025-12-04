@@ -5,6 +5,8 @@
 window.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     loadUserData();
+    loadUserPasses();
+    loadUserTravels();
 });
 
 // ============================================
@@ -310,4 +312,248 @@ function showToast(message, type = 'success') {
     setTimeout(() => {
         toast.classList.remove('show');
     }, 4000);
+}
+
+// ============================================
+// PASSES MANAGEMENT
+// ============================================
+
+async function loadUserPasses() {
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) return;
+
+        const response = await fetch(`/api/passes/user/${user.id}`);
+        const data = await response.json();
+
+        const passesList = document.getElementById('passes-list');
+
+        if (data.success && data.passes && data.passes.length > 0) {
+            passesList.innerHTML = `
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Price</th>
+                                <th>Date Added</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.passes.map(pass => `
+                                <tr>
+                                    <td><i class="fas fa-ticket-alt"></i> ${capitalizeFirstLetter(pass.type)}</td>
+                                    <td>${pass.price} HUF</td>
+                                    <td>${formatDate(pass.date)}</td>
+                                    <td>
+                                        <button class="btn-icon btn-danger" onclick="deletePass(${pass.id})" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } else {
+            passesList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-ticket-alt"></i>
+                    <p>No passes found. Add your first pass using the form above!</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading passes:', error);
+        document.getElementById('passes-list').innerHTML = `
+            <div class="error-state">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Failed to load passes</p>
+            </div>
+        `;
+    }
+}
+
+async function addNewPass(event) {
+    event.preventDefault();
+
+    const passType = document.getElementById('pass-type').value;
+    const passPrice = document.getElementById('pass-price').value;
+
+    if (!passType || !passPrice) {
+        showToast('Please fill in all fields', 'error');
+        return;
+    }
+
+    showLoading();
+
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        const response = await fetch('/api/passes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                type: passType,
+                price: parseFloat(passPrice),
+                user_id: user.id
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('Pass added successfully!', 'success');
+            document.getElementById('pass-form').reset();
+            loadUserPasses();
+        } else {
+            showToast(data.error || 'Failed to add pass', 'error');
+        }
+
+    } catch (error) {
+        showToast('An error occurred. Please try again.', 'error');
+        console.error('Add pass error:', error);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function deletePass(passId) {
+    const confirmed = confirm('Are you sure you want to delete this pass?');
+
+    if (!confirmed) return;
+
+    showLoading();
+
+    try {
+        const response = await fetch(`/api/passes/${passId}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('Pass deleted successfully', 'success');
+            loadUserPasses();
+        } else {
+            showToast(data.error || 'Failed to delete pass', 'error');
+        }
+
+    } catch (error) {
+        showToast('An error occurred. Please try again.', 'error');
+        console.error('Delete pass error:', error);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================
+// TRAVELS MANAGEMENT
+// ============================================
+
+async function loadUserTravels() {
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) return;
+
+        const response = await fetch(`/api/travels/user/${user.id}`);
+        const data = await response.json();
+
+        const travelsList = document.getElementById('travels-list');
+
+        if (data.success && data.travels && data.travels.length > 0) {
+            travelsList.innerHTML = `
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Transport Type</th>
+                                <th>Distance</th>
+                                <th>Duration</th>
+                                <th>Cost</th>
+                                <th>CO₂ Emissions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.travels.map(travel => `
+                                <tr>
+                                    <td>${formatDate(travel.date)}</td>
+                                    <td><i class="fas fa-${getTransportIcon(travel.transportType)}"></i> ${capitalizeFirstLetter(travel.transportType || 'N/A')}</td>
+                                    <td>${travel.distance ? travel.distance.toFixed(2) + ' km' : 'N/A'}</td>
+                                    <td>${travel.duration ? formatDuration(travel.duration) : 'N/A'}</td>
+                                    <td>${travel.cost ? travel.cost.toFixed(2) + ' HUF' : 'N/A'}</td>
+                                    <td>${travel.CO2Emissions ? travel.CO2Emissions.toFixed(2) + ' kg' : 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } else {
+            travelsList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-route"></i>
+                    <p>No travel history found. Start planning your trips!</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading travels:', error);
+        document.getElementById('travels-list').innerHTML = `
+            <div class="error-state">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Failed to load travel history</p>
+            </div>
+        `;
+    }
+}
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+function capitalizeFirstLetter(string) {
+    if (!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function formatDuration(minutes) {
+    if (!minutes) return 'N/A';
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.round(minutes % 60);
+    if (hours > 0) {
+        return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+}
+
+function getTransportIcon(transportType) {
+    const icons = {
+        'bike': 'bicycle',
+        'bicycle': 'bicycle',
+        'car': 'car',
+        'bus': 'bus',
+        'train': 'train',
+        'walking': 'walking',
+        'walk': 'walking'
+    };
+    return icons[transportType?.toLowerCase()] || 'route';
+}
 }

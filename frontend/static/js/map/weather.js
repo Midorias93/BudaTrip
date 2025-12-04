@@ -3,13 +3,13 @@ import { clearMarkers, clearRoute } from './markers.js';
 
 window.currentWeather = null;
 
-export async function showAllWeather() {
+export async function fetchAndSaveWeather() {
     try {
-        const response = await fetch('/api/weather');
+        const response = await fetch('/api/weather/current');
         const data = await response.json();
 
         if (data.success) {
-            const { precipitation, temperature, wind_speed } = data.weather;
+            const { temperature, precipitation, wind_speed } = data.weather;
 
             document.getElementById('temp').textContent = `${temperature}°C`;
             document.getElementById('wind').textContent = `${wind_speed} km/h`;
@@ -18,11 +18,37 @@ export async function showAllWeather() {
             window.currentWeather = { precipitation, temperature, wind_speed };
         }
     } catch (error) {
+        console.error('Weather fetch error:', error);
+        // Fallback to latest weather from database
+        showLatestWeather();
+    }
+}
+
+export async function showLatestWeather() {
+    try {
+        const response = await fetch('/api/weather/latest');
+        const data = await response.json();
+
+        if (data.success) {
+            const { precipitation, temperature, windSpeed } = data.weather;
+
+            document.getElementById('temp').textContent = `${temperature}°C`;
+            document.getElementById('wind').textContent = `${windSpeed} km/h`;
+            document.getElementById('precipitation').textContent = `${precipitation}%`;
+
+            window.currentWeather = { precipitation, temperature, wind_speed: windSpeed };
+        }
+    } catch (error) {
         console.error('Weather error:', error);
         document.getElementById('temp').textContent = 'N/A';
         document.getElementById('wind').textContent = 'N/A';
         document.getElementById('precipitation').textContent = 'N/A';
     }
+}
+
+export async function showAllWeather() {
+    // First try to fetch and save new weather
+    await fetchAndSaveWeather();
 }
 
 export function checkRainAndShowAlert() {
@@ -79,5 +105,6 @@ export function switchToBKK() {
 
 export function initWeather() {
     showAllWeather();
-    setInterval(showAllWeather, 600000);
+    // Refresh weather every 30 minutes (1800000 milliseconds)
+    setInterval(showAllWeather, 1800000);
 }

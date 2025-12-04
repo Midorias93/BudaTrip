@@ -9,6 +9,9 @@ from backend.entities.services.WeatherService import (
     update_weather,
     delete_weather
 )
+from backend.statics.weather.Weather import get_weather
+from backend.statics.localisation.Location import get_my_coordinates
+from datetime import datetime
 
 weather_bp = Blueprint('weather', __name__)
 
@@ -203,5 +206,71 @@ def count_weather():
             'count': count
         }), 200
 
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@weather_bp.route('/api/weather/current', methods=['GET'])
+def get_current_weather():
+    """Fetch current weather from external API and save to database"""
+    try:
+        # Get current weather from external API
+        weather_data = get_weather()
+        
+        if not weather_data:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to fetch weather data'
+            }), 500
+        
+        # Get current coordinates
+        lat, lon = get_my_coordinates()
+        
+        # Save to database
+        weather_id = create_weather(
+            date=datetime.now(),
+            position_lat=lat,
+            position_lon=lon,
+            temperature=weather_data.get('temperature'),
+            precipitation=weather_data.get('precipitation'),
+            wind_speed=weather_data.get('wind_speed')
+        )
+        
+        return jsonify({
+            'success': True,
+            'weather': {
+                'id': weather_id,
+                'temperature': weather_data.get('temperature'),
+                'precipitation': weather_data.get('precipitation'),
+                'wind_speed': weather_data.get('wind_speed'),
+                'position_lat': lat,
+                'position_lon': lon
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@weather_bp.route('/api/weather/latest', methods=['GET'])
+def get_latest_weather():
+    """Get the most recent weather record from database"""
+    try:
+        # Get all weather records ordered by date (most recent first)
+        weather_records = get_all_weather(limit=1, offset=0)
+        
+        if not weather_records:
+            return jsonify({
+                'success': False,
+                'error': 'No weather records found'
+            }), 404
+        
+        latest_weather = weather_records[0]
+        
+        return jsonify({
+            'success': True,
+            'weather': latest_weather
+        }), 200
+        
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
