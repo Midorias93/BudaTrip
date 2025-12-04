@@ -1,9 +1,9 @@
-from backend.statics.localisation import Location
+from backend.statics.localisation.UserLocalisation import get_my_coordinates
 import requests
 
 
 def get_weather():
-    latitude, longitude = Location.get_my_coordinates()
+    latitude, longitude = get_my_coordinates()
     url = "https://api.open-meteo.com/v1/forecast"
 
     params = {

@@ -10,7 +10,7 @@ from backend.entities.services.WeatherService import (
     delete_weather
 )
 from backend.statics.weather.Weather import get_weather
-from backend.statics.localisation.Location import get_my_coordinates
+from backend.statics.localisation.UserLocalisation import get_my_coordinates
 from datetime import datetime
 
 weather_bp = Blueprint('weather', __name__)
