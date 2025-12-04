@@ -45,11 +45,20 @@ docker compose down
 
 ## Running the Application
 
-To run the Flask application:
+To run the Flask application, you can use either of the following methods:
+
+**Method 1: From the repository root** (recommended)
+```bash
+python -m backend.app
+```
+
+**Method 2: From the backend directory**
 ```bash
 cd backend
 python app.py
 ```
+
+Both methods will work correctly. The application will attempt to connect to the PostgreSQL database on startup.
 
 How to launch the ngrok server : ( To do on the VM ubuntu )
 ```bash
