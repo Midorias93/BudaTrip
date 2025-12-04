@@ -1,4 +1,4 @@
-from backend.entities.models.PassesModel import Pass, TransportPassType
+from backend.entities.models.PassesModel import Pass
 from peewee import DoesNotExist
 
 

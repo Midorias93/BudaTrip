@@ -1,4 +1,4 @@
-from backend.entities.models.TravelsModel import Travel, TransportType
+from backend.entities.models.TravelsModel import Travel
 from peewee import DoesNotExist, fn
 
 

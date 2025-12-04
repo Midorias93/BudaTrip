@@ -5,7 +5,12 @@ from peewee import DoesNotExist
 # ==================== CREATE OPERATIONS ====================
 
 def create_bubi_station():
-    """Create a new Bubi station"""
+    """Create a new Bubi station
+    
+    Note: BubiStation model currently only has an id field (AutoField).
+    This function serves as a placeholder. In practice, Bubi station data
+    may be populated from external sources similar to BKKStationsService.
+    """
     try:
         station = BubiStation.create()
         return station.id
@@ -51,7 +56,11 @@ def bubi_station_exists(station_id):
 # ==================== UPDATE OPERATIONS ====================
 
 def update_bubi_station(station_id):
-    """Update a Bubi station's information"""
+    """Update a Bubi station's information
+    
+    Note: BubiStation model currently only has an id field.
+    This function serves as a placeholder for future extensions.
+    """
     try:
         station = BubiStation.get_by_id(station_id)
         station.save()
