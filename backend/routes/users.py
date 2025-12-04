@@ -16,7 +16,7 @@ from backend.entities.services.UserService import(
 users_bp = Blueprint('users', __name__)
 
 @users_bp.route('/api/users', methods=['POST'])
-def create_user():
+def new_user():
     try:
         data = request.json
         name = data.get('name')
