@@ -6,7 +6,21 @@ from datetime import datetime
 # ==================== CREATE OPERATIONS ====================
 
 def create_weather(date, position_lat, position_lon, temperature=None, precipitation=None, wind_speed=None):
-    """Create a new weather record"""
+    """Create a new weather record
+    
+    Args:
+        date: Required. Date/time of the weather record.
+        position_lat: Required. Latitude of the weather location.
+        position_lon: Required. Longitude of the weather location.
+        temperature, precipitation, wind_speed: Optional weather attributes.
+    
+    Returns:
+        Weather ID if successful, None otherwise.
+    """
+    if date is None or position_lat is None or position_lon is None:
+        print("Error: date, position_lat, and position_lon are all required")
+        return None
+        
     try:
         weather = Weather.create(
             date=date,
