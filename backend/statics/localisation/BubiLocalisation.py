@@ -9,8 +9,8 @@ def bubi_location():
     Returns a dictionary with station names as keys and (lat, lon) tuples as values.
     """
     response = requests.get(
-        "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/bicycle-rental.json?key=bkk-web&version=4").__dict__
-    content = response['_content']
+        "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/bicycle-rental.json?key=bkk-web&version=4")
+    content = response.content
 
     data_decode = content.decode('utf-8')  # utf-8 is the most common
 
