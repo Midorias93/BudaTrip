@@ -56,8 +56,8 @@ def get_weather_by_id(weather_id):
 
 
 def get_all_weather(limit=100, offset=0):
-    """Get all weather records with pagination"""
-    weather_records = Weather.select().limit(limit).offset(offset)
+    """Get all weather records with pagination, ordered by date descending"""
+    weather_records = Weather.select().order_by(Weather.date.desc()).limit(limit).offset(offset)
     return [
         {
             'id': w.id,

@@ -50,13 +50,11 @@
                 <button class="nav-item" onclick="showSection('subscription')">
                     <i class="fas fa-ticket-alt"></i>
                     <span>Subscriptions</span>
-                    <span class="coming-soon-badge">Soon</span>
                 </button>
 
                 <button class="nav-item" onclick="showSection('estimate')">
                     <i class="fas fa-calculator"></i>
                     <span>Estimate</span>
-                    <span class="coming-soon-badge">Soon</span>
                 </button>
 
                 <div class="nav-divider"></div>
@@ -249,46 +247,80 @@
             <!-- Subscription Section -->
             <section id="section-subscription" class="content-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-ticket-alt"></i> Subscriptions & Tickets</h2>
-                    <p>Manage your transportation subscriptions</p>
+                    <h2><i class="fas fa-ticket-alt"></i> Subscriptions & Passes</h2>
+                    <p>Manage your transportation passes</p>
                 </div>
 
-                <div class="feature-preview-large">
-                    <div class="preview-icon">
-                        <i class="fas fa-ticket-alt"></i>
+                <!-- Add New Pass Form -->
+                <div class="content-card">
+                    <h3 class="card-title">Add New Pass</h3>
+                    <form id="pass-form" onsubmit="addNewPass(event)">
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label for="pass-type">
+                                    <i class="fas fa-ticket-alt"></i> Pass Type
+                                </label>
+                                <select id="pass-type" name="pass-type" required>
+                                    <option value="">Select a pass type</option>
+                                    <option value="monthly">Monthly Pass</option>
+                                    <option value="weekly">Weekly Pass</option>
+                                    <option value="daily">Daily Pass</option>
+                                    <option value="student">Student Pass</option>
+                                    <option value="senior">Senior Pass</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="pass-price">
+                                    <i class="fas fa-money-bill-wave"></i> Price (HUF)
+                                </label>
+                                <input
+                                    type="number"
+                                    id="pass-price"
+                                    name="pass-price"
+                                    placeholder="Enter price"
+                                    min="0"
+                                    step="0.01"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Pass
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Existing Passes -->
+                <div class="content-card">
+                    <h3 class="card-title">Your Passes</h3>
+                    <div id="passes-list">
+                        <div class="loading" style="text-align: center; padding: 20px;">
+                            <div class="spinner"></div>
+                            <p>Loading passes...</p>
+                        </div>
                     </div>
-                    <h3>Subscription Management</h3>
-                    <p>This feature will allow you to:</p>
-                    <ul class="feature-list">
-                        <li><i class="fas fa-check"></i> Store your BKK monthly passes</li>
-                        <li><i class="fas fa-check"></i> Track your Bubi bike subscriptions</li>
-                        <li><i class="fas fa-check"></i> Manage transportation tickets</li>
-                        <li><i class="fas fa-check"></i> View expiration dates</li>
-                    </ul>
-                    <span class="coming-soon-tag-large">Coming Soon</span>
                 </div>
             </section>
 
             <!-- Estimate Section -->
             <section id="section-estimate" class="content-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-calculator"></i> Cost & Time Estimate</h2>
-                    <p>Calculate journey costs and duration</p>
+                    <h2><i class="fas fa-calculator"></i> Travel History</h2>
+                    <p>View your past travels and statistics</p>
                 </div>
 
-                <div class="feature-preview-large">
-                    <div class="preview-icon">
-                        <i class="fas fa-calculator"></i>
+                <div class="content-card">
+                    <h3 class="card-title">Your Past Travels</h3>
+                    <div id="travels-list">
+                        <div class="loading" style="text-align: center; padding: 20px;">
+                            <div class="spinner"></div>
+                            <p>Loading travels...</p>
+                        </div>
                     </div>
-                    <h3>Journey Estimator</h3>
-                    <p>This feature will allow you to:</p>
-                    <ul class="feature-list">
-                        <li><i class="fas fa-check"></i> Calculate travel costs between two points</li>
-                        <li><i class="fas fa-check"></i> Compare different transportation modes</li>
-                        <li><i class="fas fa-check"></i> Estimate journey duration</li>
-                        <li><i class="fas fa-check"></i> View environmental impact</li>
-                    </ul>
-                    <span class="coming-soon-tag-large">Coming Soon</span>
                 </div>
             </section>
 
