@@ -1,5 +1,5 @@
 from backend.entities.models.TravelsModel import Travel, TransportType
-from peewee import DoesNotExist
+from peewee import DoesNotExist, fn
 
 
 # ==================== CREATE OPERATIONS ====================
@@ -135,14 +135,12 @@ def count_travels_by_user(user_id):
 
 def get_total_distance_by_user(user_id):
     """Get total distance traveled by a user"""
-    from peewee import fn
     result = Travel.select(fn.SUM(Travel.distance)).where(Travel.user_id == user_id).scalar()
     return result if result else 0
 
 
 def get_total_co2_by_user(user_id):
     """Get total CO2 emissions by a user"""
-    from peewee import fn
     result = Travel.select(fn.SUM(Travel.CO2Emissions)).where(Travel.user_id == user_id).scalar()
     return result if result else 0
 
