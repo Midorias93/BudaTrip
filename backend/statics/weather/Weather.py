@@ -1,4 +1,4 @@
-from Localisation import Location
+from backend.statics.localisation import Location
 import requests
 
 
