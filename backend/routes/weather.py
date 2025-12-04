@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from Weather import Weather
+from backend.statics.weather import Weather
 
 weather_bp = Blueprint('weather', __name__)
 

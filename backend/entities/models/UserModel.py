@@ -6,7 +6,7 @@ from peewee import (
     AutoField,
     DoubleField
 )
-from entities.models.BaseModel import BaseModel
+from backend.entities.models.BaseModel import BaseModel
 
 class User(BaseModel):
     """User model representing the users table"""

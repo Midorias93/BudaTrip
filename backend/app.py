@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from routes import register_blueprints
-from entities.models.BaseModel import initialize_database, close_database
-from DataBase.BKK import Stations
+from backend.entities.services.BaseService import initialize_database, close_database
+from backend.entities.services.BKKStationsService import clear_bkk_table, fill_bkk_table
 import os
 
 # Configure Flask to use frontend directories
@@ -31,8 +31,8 @@ def test_static():
 def initDB():
     try:
         initialize_database()
-        Stations.clear_bkk_table()
-        Stations.fill_bkk_table()
+        clear_bkk_table()
+        fill_bkk_table()
         return False
     except Exception as e:
         print(f"Database connection error: {e}")

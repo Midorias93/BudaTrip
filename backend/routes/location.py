@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from Localisation import Itinerary, Location
+from backend.statics.localisation import Location, Itinerary
 
 location_bp = Blueprint('location', __name__)
 

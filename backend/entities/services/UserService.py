@@ -1,4 +1,4 @@
-from entities.models.UserModel import User
+from backend.entities.models.UserModel import User
 from peewee import DoesNotExist, IntegrityError
 
 
@@ -92,7 +92,7 @@ def update_user(user_id, name=None, email=None, password=None, phone=None):
     """Update a user's information"""
     try:
         user = User.get_by_id(user_id)
-        
+
         # Update only provided fields
         if name is not None:
             user.name = name
@@ -102,7 +102,7 @@ def update_user(user_id, name=None, email=None, password=None, phone=None):
             user.password = password
         if phone is not None:
             user.phone = phone
-        
+
         user.save()
         return True
     except DoesNotExist:

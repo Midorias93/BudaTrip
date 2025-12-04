@@ -1,5 +1,17 @@
 from flask import Blueprint, jsonify, request
-from DataBase import Users
+from backend.entities.services.UserService import(
+    create_user,
+    get_all_users,
+    get_user_by_id,
+    count_users,
+    get_user_by_id,
+    search_users_by_name,
+    update_user,
+    update_password,
+    delete_user,
+    delete_user_by_email,
+    user_exists
+)
 
 users_bp = Blueprint('users', __name__)
 
@@ -14,7 +26,7 @@ def create_user():
         if not email or not password:
             return jsonify({'success': False, 'error': 'Email and password are required'}), 400
 
-        user_id = Users.create_user(name, email, password)
+        user_id = create_user(name, email, password)
         if user_id:
             return jsonify({'success': True, 'message': 'User created successfully', 'user_id': user_id}), 201
         else:
@@ -31,8 +43,8 @@ def get_all_users():
         limit = request.args.get('limit', default=100, type=int)
         offset = request.args.get('offset', default=0, type=int)
 
-        users = Users.get_all_users(limit=limit, offset=offset)
-        total = Users.count_users()
+        users = get_all_users(limit=limit, offset=offset)
+        total = count_users()
 
         return jsonify({
             'success': True,
@@ -50,7 +62,7 @@ def get_all_users():
 def get_user(user_id):
     """Retrieves a user by their ID"""
     try:
-        user = Users.get_user_by_id(user_id)
+        user = get_user_by_id(user_id)
 
         if user:
             return jsonify({
@@ -71,7 +83,7 @@ def get_user(user_id):
 def get_user_by_email(email):
     """Retrieves a user by their email"""
     try:
-        user = Users.get_user_by_email(email)
+        user = get_user_by_email(email)
 
         if user:
             return jsonify({
@@ -100,7 +112,7 @@ def search_users():
                 'error': 'Missing search parameter (q)'
             }), 400
 
-        users = Users.search_users_by_name(query)
+        users = search_users_by_name(query)
 
         return jsonify({
             'success': True,
@@ -124,14 +136,14 @@ def update_user(user_id):
         print(phone)
 
         # Check if the user exists
-        user = Users.get_user_by_id(user_id)
+        user = get_user_by_id(user_id)
         if not user:
             return jsonify({
                 'success': False,
                 'error': 'User not found'
             }), 404
 
-        success = Users.update_user(
+        success = update_user(
             user_id,
             name=name,
             email=email,
@@ -141,7 +153,7 @@ def update_user(user_id):
 
         if success:
             # Get the updated user
-            updated_user = Users.get_user_by_id(user_id)
+            updated_user = get_user_by_id(user_id)
             return jsonify({
                 'success': True,
                 'message': 'User updated successfully',
@@ -170,7 +182,7 @@ def update_password(user_id):
                 'error': 'New password is required'
             }), 400
 
-        success = Users.update_password(user_id, new_password)
+        success = update_password(user_id, new_password)
 
         if success:
             return jsonify({
@@ -191,7 +203,7 @@ def update_password(user_id):
 def delete_user(user_id):
     """Deletes a user"""
     try:
-        success = Users.delete_user(user_id)
+        success = delete_user(user_id)
 
         if success:
             return jsonify({
@@ -212,7 +224,7 @@ def delete_user(user_id):
 def delete_user_by_email(email):
     """Deletes a user by email"""
     try:
-        success = Users.delete_user_by_email(email)
+        success = delete_user_by_email(email)
 
         if success:
             return jsonify({
@@ -242,7 +254,7 @@ def check_email():
                 'error': 'Email required'
             }), 400
 
-        exists = Users.user_exists(email)
+        exists = user_exists(email)
 
         return jsonify({
             'success': True,
@@ -257,7 +269,7 @@ def check_email():
 def count_users():
     """Counts the total number of users"""
     try:
-        count = Users.count_users()
+        count = count_users()
 
         return jsonify({
             'success': True,

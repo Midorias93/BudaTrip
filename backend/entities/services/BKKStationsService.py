@@ -1,4 +1,4 @@
-from entities.models.BKKStationsModel import BKKStation
+from backend.entities.models.BKKStationsModel import BKKStation
 from peewee import DoesNotExist
 import csv
 
@@ -10,7 +10,7 @@ def fill_bkk_table():
         BKKStation.delete().execute()
 
         # Read the file with the csv module which handles quotes
-        with open('DataBase/BKK/stops.txt', 'r', encoding='utf-8') as f:
+        with open('utils/stops.txt', 'r', encoding='utf-8') as f:
             csv_reader = csv.DictReader(f)
 
             stations_to_insert = []

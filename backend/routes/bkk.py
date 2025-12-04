@@ -1,7 +1,11 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify
 
-from DataBase.BKK import Stations
-from Localisation import Location
+from backend.statics.localisation import Location
+from backend.entities.services.BKKStationsService import(
+    get_bkk_station_by_name,
+    get_all_bkk_stations,
+    get_bkk_station_by_stop_id,
+)
 
 bkk_bp = Blueprint('bkk', __name__)
 
@@ -17,7 +21,7 @@ def api_bkk_nearest_stop():
 @bkk_bp.route("/api/bkk/stations", methods=["GET"])
 def get_bkk_stations():
     try:
-        stations = Stations.get_all_bkk_stations()
+        stations = get_all_bkk_stations()
 
         return jsonify({
             'success': True,
@@ -29,14 +33,14 @@ def get_bkk_stations():
 
 @bkk_bp.route("/api/bkk/stations/<int:stop_id>", methods=["GET"])
 def get_bkk_stations_by_stop_id(stop_id):
-    station = Stations.get_station_by_stop_id(stop_id)
+    station = get_bkk_station_by_stop_id(stop_id)
     if not station:
         return jsonify({"error": "Station not found"}), 404
     return jsonify(station), 200
 
 @bkk_bp.route("/api/bkk/stations/<name>", methods=["GET"])
 def get_bkk_stations_by_name(name):
-    station = Stations.get_bkk_station_by_name(name)
+    station = get_bkk_station_by_name(name)
     if not station:
         return jsonify({"error": "Station not found"}), 404
     return jsonify(station), 200

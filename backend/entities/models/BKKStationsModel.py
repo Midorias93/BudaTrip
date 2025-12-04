@@ -1,5 +1,5 @@
 from peewee import CharField, DoubleField, IntegerField
-from entities.models.BaseModel import BaseModel
+from backend.entities.models.BaseModel import BaseModel
 
 class BKKStation(BaseModel):
     """BKK Station model representing the bkk table"""
