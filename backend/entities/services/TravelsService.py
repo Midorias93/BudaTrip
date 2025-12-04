@@ -37,7 +37,7 @@ def get_travel_by_id(travel_id):
         travel = Travel.get_by_id(travel_id)
         return {
             'id': travel.id,
-            'user_id': travel.user_id.id,
+            'user_id': travel.user_id.id if travel.user_id else None,
             'duration': travel.duration,
             'distance': travel.distance,
             'start_lat': travel.start_lat,
@@ -60,7 +60,7 @@ def get_all_travels(limit=100, offset=0):
     return [
         {
             'id': t.id,
-            'user_id': t.user_id.id,
+            'user_id': t.user_id.id if t.user_id else None,
             'duration': t.duration,
             'distance': t.distance,
             'start_lat': t.start_lat,
@@ -83,7 +83,7 @@ def get_travels_by_user(user_id, limit=100, offset=0):
     return [
         {
             'id': t.id,
-            'user_id': t.user_id.id,
+            'user_id': t.user_id.id if t.user_id else None,
             'duration': t.duration,
             'distance': t.distance,
             'start_lat': t.start_lat,
@@ -106,7 +106,7 @@ def get_travels_by_transport_type(transport_type, limit=100):
     return [
         {
             'id': t.id,
-            'user_id': t.user_id.id,
+            'user_id': t.user_id.id if t.user_id else None,
             'duration': t.duration,
             'distance': t.distance,
             'start_lat': t.start_lat,

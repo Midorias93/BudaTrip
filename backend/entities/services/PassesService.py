@@ -28,7 +28,7 @@ def get_pass_by_id(pass_id):
             'id': transport_pass.id,
             'type': transport_pass.type,
             'price': transport_pass.price,
-            'user_id': transport_pass.user_id.id
+            'user_id': transport_pass.user_id.id if transport_pass.user_id else None
         }
     except DoesNotExist:
         return None
@@ -42,7 +42,7 @@ def get_all_passes(limit=100, offset=0):
             'id': p.id,
             'type': p.type,
             'price': p.price,
-            'user_id': p.user_id.id
+            'user_id': p.user_id.id if p.user_id else None
         }
         for p in passes
     ]
@@ -56,7 +56,7 @@ def get_passes_by_user(user_id, limit=100):
             'id': p.id,
             'type': p.type,
             'price': p.price,
-            'user_id': p.user_id.id
+            'user_id': p.user_id.id if p.user_id else None
         }
         for p in passes
     ]
@@ -70,7 +70,7 @@ def get_passes_by_type(pass_type, limit=100):
             'id': p.id,
             'type': p.type,
             'price': p.price,
-            'user_id': p.user_id.id
+            'user_id': p.user_id.id if p.user_id else None
         }
         for p in passes
     ]

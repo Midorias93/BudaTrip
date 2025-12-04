@@ -59,7 +59,11 @@ def get_all_weather(limit=100, offset=0):
 
 
 def get_weather_by_location(lat, lon, limit=10):
-    """Get weather records for a specific location"""
+    """Get weather records for a specific location
+    
+    Note: Uses exact coordinate matching. For real-world applications,
+    consider implementing a bounding box or distance-based query.
+    """
     weather_records = Weather.select().where(
         (Weather.position_lat == lat) & (Weather.position_lon == lon)
     ).limit(limit)
