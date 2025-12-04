@@ -10,4 +10,6 @@ TransportBikeItinerary = importlib.import_module('.Transport&BikeItinerary', pac
 class Itinerary:
     """Backward compatibility wrapper for Itinerary module"""
     # Use BikeItinerary's get_route as default since the original supported bike/foot modes
-    get_route = staticmethod(BikeItinerary.get_route)
+    get_bike_route = staticmethod(BikeItinerary.get_route)
+    get_bike_route_with_bubi = staticmethod(BikeItinerary.get_route_with_bubi)
+    get_car_route = staticmethod(CarItinerary.get_route)
