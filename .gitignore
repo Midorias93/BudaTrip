@@ -1,11 +1,4 @@
 .idea
-.DB_Store
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
+backend/.DockerVolume
 .venv/
-venv/
-ENV/
-env/
-.env
