@@ -1,16 +1,10 @@
 from flask import Blueprint, jsonify, request
 from backend.entities.services.UserService import(
     create_user,
-    get_all_users,
-    get_user_by_id,
-    count_users,
-    get_user_by_id,
-    search_users_by_name,
-    update_user,
-    update_password,
-    delete_user,
-    delete_user_by_email,
-    user_exists
+    get_user_by_id as service_get_user_by_id,
+    update_user as service_update_user,
+    update_password as service_update_password,
+    delete_user as service_delete_user
 )
 
 users_bp = Blueprint('users', __name__)
@@ -36,33 +30,11 @@ def new_user():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@users_bp.route('/api/users', methods=['GET'])
-def get_all_users():
-    """Retrieves all users with pagination"""
-    try:
-        limit = request.args.get('limit', default=100, type=int)
-        offset = request.args.get('offset', default=0, type=int)
-
-        users = get_all_users(limit=limit, offset=offset)
-        total = count_users()
-
-        return jsonify({
-            'success': True,
-            'users': users,
-            'total': total,
-            'limit': limit,
-            'offset': offset
-        }), 200
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
 @users_bp.route('/api/users/<int:user_id>', methods=['GET'])
-def get_user(user_id):
+def get_user_endpoint(user_id):
     """Retrieves a user by their ID"""
     try:
-        user = get_user_by_id(user_id)
+        user = service_get_user_by_id(user_id)
 
         if user:
             return jsonify({
@@ -74,58 +46,13 @@ def get_user(user_id):
                 'success': False,
                 'error': 'User not found'
             }), 404
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-@users_bp.route('/api/users/email/<email>', methods=['GET'])
-def get_user_by_email(email):
-    """Retrieves a user by their email"""
-    try:
-        user = get_user_by_email(email)
-
-        if user:
-            return jsonify({
-                'success': True,
-                'user': user
-            }), 200
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'User not found'
-            }), 404
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-@users_bp.route('/api/users/search', methods=['GET'])
-def search_users():
-    """Search for users by name"""
-    try:
-        query = request.args.get('q', '')
-
-        if not query:
-            return jsonify({
-                'success': False,
-                'error': 'Missing search parameter (q)'
-            }), 400
-
-        users = search_users_by_name(query)
-
-        return jsonify({
-            'success': True,
-            'users': users,
-            'count': len(users)
-        }), 200
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @users_bp.route('/api/users/<int:user_id>', methods=['PUT', 'PATCH'])
-def update_user(user_id):
+def update_user_endpoint(user_id):
     """Updates a user"""
     try:
         data = request.json
@@ -133,27 +60,26 @@ def update_user(user_id):
         email = data.get('email')
         password = data.get('password')
         phone = data.get('phone')
-        print(phone)
 
         # Check if the user exists
-        user = get_user_by_id(user_id)
+        user = service_get_user_by_id(user_id)
         if not user:
             return jsonify({
                 'success': False,
                 'error': 'User not found'
             }), 404
 
-        success = update_user(
+        success = service_update_user(
             user_id,
             name=name,
             email=email,
             password=password,
-            phone = phone
+            phone=phone
         )
 
         if success:
             # Get the updated user
-            updated_user = get_user_by_id(user_id)
+            updated_user = service_get_user_by_id(user_id)
             return jsonify({
                 'success': True,
                 'message': 'User updated successfully',
@@ -170,7 +96,7 @@ def update_user(user_id):
 
 
 @users_bp.route('/api/users/<int:user_id>/password', methods=['PUT'])
-def update_password(user_id):
+def update_password_endpoint(user_id):
     """Updates only the password"""
     try:
         data = request.json
@@ -182,7 +108,7 @@ def update_password(user_id):
                 'error': 'New password is required'
             }), 400
 
-        success = update_password(user_id, new_password)
+        success = service_update_password(user_id, new_password)
 
         if success:
             return jsonify({
@@ -200,10 +126,10 @@ def update_password(user_id):
 
 
 @users_bp.route('/api/users/<int:user_id>', methods=['DELETE'])
-def delete_user(user_id):
+def delete_user_endpoint(user_id):
     """Deletes a user"""
     try:
-        success = delete_user(user_id)
+        success = service_delete_user(user_id)
 
         if success:
             return jsonify({
@@ -215,66 +141,6 @@ def delete_user(user_id):
                 'success': False,
                 'error': 'User not found'
             }), 404
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-@users_bp.route('/api/users/email/<email>', methods=['DELETE'])
-def delete_user_by_email(email):
-    """Deletes a user by email"""
-    try:
-        success = delete_user_by_email(email)
-
-        if success:
-            return jsonify({
-                'success': True,
-                'message': 'User deleted successfully'
-            }), 200
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'User not found'
-            }), 404
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-@users_bp.route('/api/users/check-email', methods=['POST'])
-def check_email():
-    """Checks if an email already exists"""
-    try:
-        data = request.json
-        email = data.get('email')
-
-        if not email:
-            return jsonify({
-                'success': False,
-                'error': 'Email required'
-            }), 400
-
-        exists = user_exists(email)
-
-        return jsonify({
-            'success': True,
-            'exists': exists
-        }), 200
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-@users_bp.route('/api/users/count', methods=['GET'])
-def count_users():
-    """Counts the total number of users"""
-    try:
-        count = count_users()
-
-        return jsonify({
-            'success': True,
-            'count': count
-        }), 200
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
