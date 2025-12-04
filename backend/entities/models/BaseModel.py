@@ -8,6 +8,9 @@ class BaseModel(Model):
 
 def initialize_database():
     """Connect to the database and create tables if they don't exist"""
+    from entities.models.UserModel import User
+    from entities.models.BKKStationsModel import BKKStation
+    
     db.connect(reuse_if_open=True)
     db.create_tables([User, BKKStation], safe=True)
     print("Database initialized and tables created")
