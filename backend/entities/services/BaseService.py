@@ -1,11 +1,15 @@
 from backend.config import db
 from backend.entities.models.UserModel import User
 from backend.entities.models.BKKStationsModel import BKKStation
+from backend.entities.models.BubiStationsModel import BubiStation
+from backend.entities.models.PassesModel import Pass
+from backend.entities.models.TravelsModel import Travel
+from backend.entities.models.WeatherModel import Weather
 
 def initialize_database():
     """Connect to the database and create tables if they don't exist"""
     db.connect(reuse_if_open=True)
-    db.create_tables([User, BKKStation], safe=True)
+    db.create_tables([User, BKKStation, BubiStation, Pass, Travel, Weather], safe=True)
     print("Database initialized and tables created")
 
 
