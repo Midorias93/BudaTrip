@@ -3,7 +3,7 @@ from flask import Blueprint
 def register_blueprints(app):
     from .endpointAuth import auth_bp
     from .endpointUsers import users_bp
-    from .endpointLocation import location_bp
+    from .endpointLocalisation import location_bp
     from .endpointsInteneraray import itinerary_bp
     from .endpointWeather import weather_bp
     from .endpointBKK import bkk_bp
