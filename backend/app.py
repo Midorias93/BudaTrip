@@ -1,8 +1,13 @@
+import sys
+import os
+
+# Add parent directory to path to allow imports when running from backend directory
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from flask import Flask, render_template
-from routes import register_blueprints
+from backend.routes import register_blueprints
 from backend.entities.services.BaseService import initialize_database, close_database
 from backend.entities.services.BKKStationsService import clear_bkk_table, fill_bkk_table
-import os
 
 # Configure Flask to use frontend directories
 frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frontend')
