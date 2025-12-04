@@ -1,7 +1,6 @@
 from flask import Flask, render_template
-from config import Config
 from routes import register_blueprints
-from DataBase.models import initialize_database, close_database
+from entities.models.BaseModel import initialize_database, close_database
 from DataBase.BKK import Stations
 import os
 
@@ -11,7 +10,6 @@ static_dir = os.path.join(frontend_dir, 'static')
 template_dir = os.path.join(frontend_dir, 'templates')
 
 app = Flask(__name__, static_folder=static_dir, template_folder=template_dir)
-app.config.from_object(Config)
 
 # Register all blueprints
 register_blueprints(app)

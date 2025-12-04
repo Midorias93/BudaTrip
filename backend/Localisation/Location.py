@@ -3,7 +3,7 @@ from geopy.geocoders import Nominatim
 import json
 from math import radians, sin, cos, sqrt, atan2
 import geocoder
-from DataBase.models import BKKStation
+from entities.models.BKKStationsModel import BKKStation
 
 
 def get_location():

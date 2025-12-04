@@ -1,4 +1,4 @@
-from DataBase.models import BKKStation
+from entities.models.BKKStationsModel import BKKStation
 from peewee import DoesNotExist
 import csv
 

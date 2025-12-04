@@ -1,4 +1,4 @@
-from DataBase.models import User
+from entities.models.UserModel import User
 from peewee import DoesNotExist, IntegrityError
 
 
