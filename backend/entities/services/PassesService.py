@@ -5,7 +5,20 @@ from peewee import DoesNotExist
 # ==================== CREATE OPERATIONS ====================
 
 def create_pass(pass_type, price, user_id):
-    """Create a new transport pass"""
+    """Create a new transport pass
+    
+    Args:
+        pass_type: Required. Type of the pass (e.g., MONTHLY, WEEKLY).
+        price: Required. Price of the pass.
+        user_id: Required. ID of the user who owns the pass.
+    
+    Returns:
+        Pass ID if successful, None otherwise.
+    """
+    if pass_type is None or price is None or user_id is None:
+        print("Error: pass_type, price, and user_id are all required")
+        return None
+        
     try:
         transport_pass = Pass.create(
             type=pass_type,

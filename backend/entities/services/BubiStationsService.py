@@ -63,7 +63,7 @@ def update_bubi_station(station_id):
     """
     try:
         station = BubiStation.get_by_id(station_id)
-        station.save()
+        # No fields to update, just verify station exists
         return True
     except DoesNotExist:
         return False

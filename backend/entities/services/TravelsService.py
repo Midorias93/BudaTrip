@@ -7,7 +7,19 @@ from peewee import DoesNotExist, fn
 def create_travel(user_id, duration=None, distance=None, start_lat=None, start_lon=None, 
                  end_lat=None, end_lon=None, transport_type=None, cost=None, 
                  co2_emissions=None, weather_id=None, pass_id=None):
-    """Create a new travel record"""
+    """Create a new travel record
+    
+    Args:
+        user_id: Required. ID of the user who made the travel.
+        Other parameters are optional travel attributes.
+    
+    Returns:
+        Travel ID if successful, None otherwise.
+    """
+    if user_id is None:
+        print("Error: user_id is required")
+        return None
+        
     try:
         travel = Travel.create(
             user_id=user_id,
