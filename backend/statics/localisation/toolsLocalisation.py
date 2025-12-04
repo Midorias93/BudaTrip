@@ -1,10 +1,10 @@
-from geopy.geocoders import Nominatim
+import requests
 from math import radians, sin, cos, sqrt, atan2
 
 
 def haversine_distance(coord1, coord2):
     """
-    Calculate the great circle distance between two points 
+    Calculate the great circle distance between two points
     on the earth (specified in decimal degrees).
     Returns distance in kilometers.
     """
@@ -25,18 +25,28 @@ def haversine_distance(coord1, coord2):
 def get_coordinates(address):
     """
     Get coordinates (latitude, longitude) from a given address.
-    Uses Nominatim geocoding service.
+    Uses OpenStreetMap Nominatim API directly.
     """
-    geolocator = Nominatim(user_agent="my_application")
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {
+        "q": address,
+        "format": "json",
+        "limit": 1
+    }
+    headers = {
+        "User-Agent": "BudaTrip/1.0"
+    }
 
     try:
-        location = geolocator.geocode(address)
+        response = requests.get(url, params=params, headers=headers)
+        data = response.json()
 
-        if location:
+        if data:
+            location = data[0]
             return {
-                "address": location.address,
-                "latitude": location.latitude,
-                "longitude": location.longitude
+                "address": location. get("display_name"),
+                "latitude": float(location. get("lat")),
+                "longitude": float(location.get("lon"))
             }
         else:
             return "Address not found"
