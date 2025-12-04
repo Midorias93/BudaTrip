@@ -336,7 +336,6 @@ async function loadUserPasses() {
                             <tr>
                                 <th>Type</th>
                                 <th>Price</th>
-                                <th>Date Added</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -345,7 +344,6 @@ async function loadUserPasses() {
                                 <tr>
                                     <td><i class="fas fa-ticket-alt"></i> ${capitalizeFirstLetter(pass.type)}</td>
                                     <td>${pass.price} HUF</td>
-                                    <td>${formatDate(pass.date)}</td>
                                     <td>
                                         <button class="btn-icon btn-danger" onclick="deletePass(${pass.id})" title="Delete">
                                             <i class="fas fa-trash"></i>
@@ -471,7 +469,6 @@ async function loadUserTravels() {
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Date</th>
                                 <th>Transport Type</th>
                                 <th>Distance</th>
                                 <th>Duration</th>
@@ -482,7 +479,6 @@ async function loadUserTravels() {
                         <tbody>
                             ${data.travels.map(travel => `
                                 <tr>
-                                    <td>${formatDate(travel.date)}</td>
                                     <td><i class="fas fa-${getTransportIcon(travel.transportType)}"></i> ${capitalizeFirstLetter(travel.transportType || 'N/A')}</td>
                                     <td>${travel.distance ? travel.distance.toFixed(2) + ' km' : 'N/A'}</td>
                                     <td>${travel.duration ? formatDuration(travel.duration) : 'N/A'}</td>
@@ -534,14 +530,14 @@ function formatDate(dateString) {
     });
 }
 
-function formatDuration(minutes) {
-    if (!minutes) return 'N/A';
-    const hours = Math.floor(minutes / 60);
-    const mins = Math.round(minutes % 60);
+function formatDuration(seconds) {
+    if (!seconds) return 'N/A';
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
     if (hours > 0) {
-        return `${hours}h ${mins}m`;
+        return `${hours}h ${minutes}m`;
     }
-    return `${mins}m`;
+    return `${minutes}m`;
 }
 
 function getTransportIcon(transportType) {
@@ -555,5 +551,4 @@ function getTransportIcon(transportType) {
         'walk': 'walking'
     };
     return icons[transportType?.toLowerCase()] || 'route';
-}
 }
