@@ -297,6 +297,27 @@ body {
     cursor: pointer;
 }
 
+.transport-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.transport-select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.transport-select:hover {
+    border-color: #3498db;
+}
+
 /* ============================================
    BUTTONS
    ============================================ */
@@ -986,3 +1007,56 @@ body {
     }
 }
 
+
+/* ============================================
+   SUCCESS NOTIFICATION
+   ============================================ */
+.notification {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    z-index: 10000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.notification.success {
+    border-left: 4px solid #27ae60;
+    color: #27ae60;
+}
+
+.notification.success i {
+    font-size: 18px;
+    color: #27ae60;
+}
+
+.notification.error {
+    border-left: 4px solid #e74c3c;
+    color: #e74c3c;
+}
+
+.notification.error i {
+    font-size: 18px;
+    color: #e74c3c;
+}
+
+.info-note {
+    color: #7f8c8d;
+    font-size: 13px;
+    font-style: italic;
+    margin-top: 10px;
+}
