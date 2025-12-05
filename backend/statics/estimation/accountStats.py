@@ -19,11 +19,9 @@ logger = logging.getLogger(__name__)
 # CO2 emission constants (grams per kilometer)
 CO2_EMISSIONS = {
     'CAR': 180,           # Car produces 180g of CO2 per km
-    'BUS': 2,             # Public transport produces 2g per km
-    'TRAIN': 2,           # Public transport produces 2g per km
-    'TRAM': 2,            # Public transport produces 2g per km
-    'SUBWAY': 2,          # Public transport produces 2g per km
-    'BIKE': 0,            # Bike produces 0g of CO2
+    'TRANSPORT': 2,       # Public transport produces 2g per km
+    'BUBI': 0,            # Bubi bike-sharing produces 0g of CO2
+    'BIKE': 0,            # Personal bike produces 0g of CO2
     'WALK': 0             # Walking produces 0g of CO2
 }
 
@@ -43,7 +41,8 @@ def get_user_distance_by_transport(user_id):
         Dictionary with transport types as keys and distances (in meters) as values
         Example: {
             'CAR': 15000.5,
-            'BUS': 8000.0,
+            'TRANSPORT': 8000.0,
+            'BUBI': 3000.0,
             'BIKE': 5000.0,
             'WALK': 2000.0
         }
@@ -74,8 +73,8 @@ def get_user_pollution(user_id):
     
     CO2 emission rates:
     - Car: 180 grams per kilometer
-    - Public transport (BUS, TRAIN, TRAM, SUBWAY): 2 grams per kilometer
-    - Bike and Walk: 0 grams per kilometer
+    - Public transport (TRANSPORT): 2 grams per kilometer
+    - Bubi, Bike and Walk: 0 grams per kilometer
     
     Args:
         user_id: The ID of the user
@@ -88,8 +87,9 @@ def get_user_pollution(user_id):
             'total_co2': 5400.0,
             'by_transport': {
                 'CAR': 5400.0,
-                'BUS': 16.0,
-                'BIKE': 0.0
+                'TRANSPORT': 16.0,
+                'BIKE': 0.0,
+                'BUBI': 0.0
             }
         }
     """
@@ -153,15 +153,12 @@ def get_user_cost(user_id):
     Calculate the total cost of all travels for a user.
     
     Cost rules:
-    - If user has BKK pass: Public transport (BUS, TRAIN, TRAM, SUBWAY) is free
-    - Without pass: 250 Forint per travel for public transport
-    - Bike: Always free (treated as personal bikes)
+    - If user has BKK pass: Public transport (TRANSPORT) is free
+    - If user has BUBI pass: Bubi bike-sharing is free
+    - Without pass: 250 Forint per travel for public transport and Bubi
+    - Personal bike (BIKE): Always free
     - Walk: Always free
     - Car: 250 Forint per kilometer
-    
-    Note: The current implementation cannot distinguish between personal bikes and Bubi.
-    All BIKE transport is treated as personal bikes (free). Bubi-specific costs should be
-    tracked separately if needed.
     
     Args:
         user_id: The ID of the user
@@ -175,7 +172,8 @@ def get_user_cost(user_id):
             'total_cost': 12500.0,
             'by_transport': {
                 'CAR': 7500.0,
-                'BUS': 5000.0,
+                'TRANSPORT': 5000.0,
+                'BUBI': 0.0,
                 'BIKE': 0.0
             },
             'passes': ['BKK', 'BUBI']
@@ -209,16 +207,18 @@ def get_user_cost(user_id):
                     distance_km = travel.distance / 1000.0
                     cost = distance_km * COST_PER_KM_CAR
             
-            elif transport_upper in ['BUS', 'TRAIN', 'TRAM', 'SUBWAY']:
+            elif transport_upper == 'TRANSPORT':
                 # Public transport: Free with BKK pass, otherwise 250 per travel
                 if not has_bkk_pass:
                     cost = COST_PER_TRAVEL
             
+            elif transport_upper == 'BUBI':
+                # Bubi bike-sharing: Free with BUBI pass, otherwise 250 per travel
+                if not has_bubi_pass:
+                    cost = COST_PER_TRAVEL
+            
             elif transport_upper == 'BIKE':
-                # Bike is always free (personal bikes)
-                # Note: Bubi bike-sharing would be 250 per travel (free with BUBI pass)
-                # but the current model doesn't distinguish between personal bikes and Bubi.
-                # We assume all BIKE entries are personal bikes (free).
+                # Personal bike is always free
                 cost = 0.0
             
             elif transport_upper == 'WALK':
