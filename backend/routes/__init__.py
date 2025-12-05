@@ -9,6 +9,7 @@ def register_blueprints(app):
     from .endpointBKK import bkk_bp
     from .endpointPasses import passes_bp
     from .endpointTravels import travels_bp
+    from .endpointEstimation import estimation_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
@@ -18,3 +19,4 @@ def register_blueprints(app):
     app.register_blueprint(bkk_bp)
     app.register_blueprint(passes_bp)
     app.register_blueprint(travels_bp)
+    app.register_blueprint(estimation_bp)
