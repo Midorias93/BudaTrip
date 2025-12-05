@@ -47,7 +47,6 @@ export async function calculateAndSaveRoute() {
         setEndMarker(endMark);
 
         let routeResult;
-        
         switch(transportMode) {
             case 'bike':
                 routeResult = await calculateSimpleRoute(startCoords, endCoords, 'bike');
@@ -340,6 +339,7 @@ async function saveRouteToTravels(startCoords, endCoords, transportMode, routeDa
             user = JSON.parse(userStr);
         } catch (parseError) {
             console.error('Invalid user data in localStorage:', parseError);
+            showError('Invalid user session, please log in again');
             return;
         }
         
