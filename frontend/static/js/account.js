@@ -511,13 +511,13 @@ async function loadUserTravels() {
 
 async function loadUserEstimation() {
     try {
-        const user = JSON.parse(localStorage. getItem('user'));
+        const user = JSON.parse(localStorage.getItem('user'));
         if (!user) return;
 
         const response = await fetch(`/api/travels/user/${user.id}/stats`);
         const data = await response.json();
 
-        const estimationStats = document. getElementById('estimation-stats');
+        const estimationStats = document.getElementById('estimation-stats');
 
         if (data.success && data.statistics) {
             const stats = data.statistics;
