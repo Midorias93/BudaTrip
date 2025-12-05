@@ -28,12 +28,12 @@ def calculate_bike_route():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@itinerary_bp. route('/api/route-with-stations', methods=['POST'])
+@itinerary_bp.route('/api/route-with-stations', methods=['POST'])
 def route_with_stations():
     try:
         data = request.json
         start_coords = (float(data.get('start_lat')), float(data.get('start_lon')))
-        end_coords = (float(data. get('end_lat')), float(data.get('end_lon')))
+        end_coords = (float(data.get('end_lat')), float(data.get('end_lon')))
 
         result = Itinerary.get_bike_route_with_bubi(start_coords, end_coords)
 

@@ -5,9 +5,7 @@ This module handles route calculation using BKK public transportation.
 
 import requests
 from backend.statics.localisation import Location
-
-# BKK Futár API key
-BKK_API_KEY = "61f16316-3fac-4cd7-a4f0-77feac9976ab"
+from backend.config import BKK_API_KEY, BKK_API_BASE_URL
 
 
 def get_route(start_coords, end_coords):
@@ -31,7 +29,7 @@ def get_route(start_coords, end_coords):
         end_lat, end_lon = end_coords
         
         # BKK Futár API endpoint for journey planning (OpenTripPlanner-based)
-        url = "http://futar.bkk.hu/otp/routers/default/plan"
+        url = f"{BKK_API_BASE_URL}/otp/routers/default/plan"
         
         params = {
             'fromPlace': f"{start_lat},{start_lon}",
