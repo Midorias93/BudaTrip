@@ -1,6 +1,25 @@
 """
 Functions to compute itineraries using public transport (BKK).
-This module handles route calculation using BKK public transportation.
+
+This module handles route calculation using BKK (Budapest Public Transport) Futár API,
+which is based on OpenTripPlanner. It provides journey planning functionality for
+public transportation in Budapest, including metro, tram, bus, and trolleybus routes.
+
+The BKK API key and base URL are configured in backend/config.py.
+
+Example usage:
+    from backend.statics.itinerary.TransportItinerary import get_route
+    
+    # Calculate route from Parliament to Keleti Station
+    route = get_route((47.5071, 19.0459), (47.5000, 19.0844))
+    if route:
+        print(f"Duration: {route['duration']} seconds")
+        for leg in route['legs']:
+            print(f"{leg['mode']}: {leg['from']['name']} -> {leg['to']['name']}")
+
+API Endpoints:
+    - POST /api/route/transport - Basic public transport routing
+    - POST /api/route/transport-with-stops - Routing with nearest stop information
 """
 
 import requests
