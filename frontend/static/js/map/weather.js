@@ -12,7 +12,7 @@ export async function fetchAndSaveWeather() {
         const data = await response.json();
 
         if (data.success) {
-            const { temperature, precipitation, wind_speed } = data.weather;
+            var { temperature, precipitation, wind_speed } = data.weather;
 
             document.getElementById('temp').textContent = `${temperature}°C`;
             document.getElementById('wind').textContent = `${wind_speed} km/h`;
@@ -52,6 +52,7 @@ export async function showLatestWeather() {
 export async function showAllWeather() {
     // First try to fetch and save new weather
     await fetchAndSaveWeather();
+    await checkRainAndShowAlert()
 }
 
 export function checkRainAndShowAlert() {
