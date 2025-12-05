@@ -7,10 +7,13 @@ This module provides functions to compute:
 - Travel costs based on pass ownership and transport type
 """
 
+import logging
 from peewee import fn
 from backend.entities.models.TravelsModel import Travel, TransportType
-from backend.entities.models.PassesModel import Pass, TransportPassType
+from backend.entities.models.PassesModel import Pass
 from backend.entities.models.UserModel import User
+
+logger = logging.getLogger(__name__)
 
 
 # CO2 emission constants (grams per kilometer)
@@ -61,7 +64,7 @@ def get_user_distance_by_transport(user_id):
         return result
     
     except Exception as e:
-        print(f"Error calculating distance by transport for user {user_id}: {e}")
+        logger.error(f"Error calculating distance by transport for user {user_id}: {e}")
         return {}
 
 
@@ -114,7 +117,7 @@ def get_user_pollution(user_id):
         }
     
     except Exception as e:
-        print(f"Error calculating pollution for user {user_id}: {e}")
+        logger.error(f"Error calculating pollution for user {user_id}: {e}")
         return {
             'total_co2': 0.0,
             'by_transport': {}
@@ -141,7 +144,7 @@ def _user_has_pass(user_id, pass_type=None):
         return query.exists()
     
     except Exception as e:
-        print(f"Error checking pass for user {user_id}: {e}")
+        logger.error(f"Error checking pass for user {user_id}: {e}")
         return False
 
 
@@ -156,6 +159,9 @@ def get_user_cost(user_id):
     - Bike (personal): Always free
     - Walk: Always free
     - Car: 250 Forint per kilometer
+    
+    Note: The current implementation cannot distinguish between personal bikes and Bubi.
+    All BIKE transport is treated as potentially Bubi and charged unless user has BUBI pass.
     
     Args:
         user_id: The ID of the user
@@ -234,7 +240,7 @@ def get_user_cost(user_id):
         }
     
     except Exception as e:
-        print(f"Error calculating cost for user {user_id}: {e}")
+        logger.error(f"Error calculating cost for user {user_id}: {e}")
         return {
             'total_cost': 0.0,
             'by_transport': {},
@@ -274,7 +280,7 @@ def get_user_statistics(user_id):
         # Verify user exists
         user_exists = User.select().where(User.id == user_id).exists()
         if not user_exists:
-            print(f"User with ID {user_id} does not exist")
+            logger.warning(f"User with ID {user_id} does not exist")
             return None
         
         # Get distance statistics
@@ -298,5 +304,5 @@ def get_user_statistics(user_id):
         }
     
     except Exception as e:
-        print(f"Error getting statistics for user {user_id}: {e}")
+        logger.error(f"Error getting statistics for user {user_id}: {e}")
         return None
