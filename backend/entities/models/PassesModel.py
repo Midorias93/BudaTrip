@@ -6,12 +6,10 @@ from backend.entities.models.UserModel import User
 
 class TransportPassType(Enum):
     """Enum for transport pass types"""
-    MONTHLY = "MONTHLY"
-    WEEKLY = "WEEKLY"
-    DAILY = "DAILY"
-    YEARLY = "YEARLY"
-    STUDENT = "STUDENT"
-    SENIOR = "SENIOR"
+    BKK = "BKK"
+    BUBI = "BUBI"
+    LIME = "LIME"
+    DOTT = "DOTT"
 
 
 class Pass(BaseModel):
