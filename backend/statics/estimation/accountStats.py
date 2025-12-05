@@ -215,13 +215,11 @@ def get_user_cost(user_id):
                     cost = COST_PER_TRAVEL
             
             elif transport_upper == 'BIKE':
-                # Need to determine if it's Bubi or personal bike
-                # For Bubi: Free with BUBI pass, otherwise 250 per travel
-                # For personal bike: Always free
-                # Since we can't distinguish in current model, we'll check for Bubi pass
-                if not has_bubi_pass:
-                    cost = COST_PER_TRAVEL
-                # Note: Personal bikes would be free, but we treat all BIKE as potentially Bubi
+                # Bike is always free (personal bikes)
+                # Note: Bubi bike-sharing would be 250 per travel (free with BUBI pass)
+                # but the current model doesn't distinguish between personal bikes and Bubi.
+                # We assume all BIKE entries are personal bikes (free).
+                cost = 0.0
             
             elif transport_upper == 'WALK':
                 # Walking is always free
