@@ -32,7 +32,6 @@ def create_travel_route():
         cost = data.get('cost')
         co2_emissions = data.get('CO2Emissions')
         weather_id = data.get('weather_id')
-        pass_id = data.get('pass_id')
 
         if not user_id:
             return jsonify({
@@ -52,7 +51,6 @@ def create_travel_route():
             cost=cost,
             co2_emissions=co2_emissions,
             weather_id=weather_id,
-            pass_id=pass_id
         )
 
         if travel_id:
@@ -187,7 +185,6 @@ def update_travel_route(travel_id):
         cost = data.get('cost')
         co2_emissions = data.get('CO2Emissions')
         weather_id = data.get('weather_id')
-        pass_id = data.get('pass_id')
 
         # Check if travel record exists
         travel = get_travel_by_id(travel_id)
@@ -209,7 +206,6 @@ def update_travel_route(travel_id):
             cost=cost,
             co2_emissions=co2_emissions,
             weather_id=weather_id,
-            pass_id=pass_id
         )
 
         if success:

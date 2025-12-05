@@ -6,7 +6,7 @@ from peewee import DoesNotExist, fn
 
 def create_travel(user_id, duration=None, distance=None, start_lat=None, start_lon=None, 
                  end_lat=None, end_lon=None, transport_type=None, cost=None, 
-                 co2_emissions=None, weather_id=None, pass_id=None):
+                 co2_emissions=None, weather_id=None):
     """Create a new travel record
     
     Args:
@@ -33,7 +33,6 @@ def create_travel(user_id, duration=None, distance=None, start_lat=None, start_l
             cost=cost,
             CO2Emissions=co2_emissions,
             weather_id=weather_id,
-            pass_id=pass_id
         )
         return travel.id
     except Exception as e:
@@ -60,7 +59,6 @@ def get_travel_by_id(travel_id):
             'cost': travel.cost,
             'CO2Emissions': travel.CO2Emissions,
             'weather_id': travel.weather_id.id if travel.weather_id else None,
-            'pass_id': travel.pass_id.id if travel.pass_id else None
         }
     except DoesNotExist:
         return None
@@ -83,7 +81,6 @@ def get_all_travels(limit=100, offset=0):
             'cost': t.cost,
             'CO2Emissions': t.CO2Emissions,
             'weather_id': t.weather_id.id if t.weather_id else None,
-            'pass_id': t.pass_id.id if t.pass_id else None
         }
         for t in travels
     ]
@@ -106,7 +103,6 @@ def get_travels_by_user(user_id, limit=100, offset=0):
             'cost': t.cost,
             'CO2Emissions': t.CO2Emissions,
             'weather_id': t.weather_id.id if t.weather_id else None,
-            'pass_id': t.pass_id.id if t.pass_id else None
         }
         for t in travels
     ]
@@ -129,7 +125,6 @@ def get_travels_by_transport_type(transport_type, limit=100):
             'cost': t.cost,
             'CO2Emissions': t.CO2Emissions,
             'weather_id': t.weather_id.id if t.weather_id else None,
-            'pass_id': t.pass_id.id if t.pass_id else None
         }
         for t in travels
     ]
@@ -161,7 +156,7 @@ def get_total_co2_by_user(user_id):
 
 def update_travel(travel_id, duration=None, distance=None, start_lat=None, start_lon=None,
                  end_lat=None, end_lon=None, transport_type=None, cost=None,
-                 co2_emissions=None, weather_id=None, pass_id=None):
+                 co2_emissions=None, weather_id=None):
     """Update a travel record"""
     try:
         travel = Travel.get_by_id(travel_id)
@@ -187,9 +182,7 @@ def update_travel(travel_id, duration=None, distance=None, start_lat=None, start
             travel.CO2Emissions = co2_emissions
         if weather_id is not None:
             travel.weather_id = weather_id
-        if pass_id is not None:
-            travel.pass_id = pass_id
-        
+
         travel.save()
         return True
     except DoesNotExist:

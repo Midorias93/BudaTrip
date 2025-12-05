@@ -15,13 +15,11 @@ from backend.entities.models.WeatherModel import Weather
 
 class TransportType(Enum):
     """Enum for transport types"""
-    BUS = "BUS"
-    TRAIN = "TRAIN"
-    TRAM = "TRAM"
+    BUBI = "BUBI"
+    TRANSPORT = "TRANSPORT"
     BIKE = "BIKE"
     WALK = "WALK"
     CAR = "CAR"
-    SUBWAY = "SUBWAY"
 
 
 class Travel(BaseModel):
@@ -38,7 +36,6 @@ class Travel(BaseModel):
     cost = BigIntegerField(null=True)
     CO2Emissions = BigIntegerField(null=True)
     weather_id = ForeignKeyField(Weather, backref='travels', null=True, on_delete='SET NULL')
-    pass_id = DeferredForeignKey('Pass', backref='travels', null=True, on_delete='SET NULL')
 
     class Meta:
         table_name = 'travel'
