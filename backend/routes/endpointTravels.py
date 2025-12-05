@@ -9,10 +9,15 @@ from backend.entities.services.TravelsService import (
     count_travels_by_user,
     get_total_distance_by_user,
     get_total_co2_by_user,
+    get_total_cost_by_user,
+    get_distance_by_transport,
+    get_co2_by_transport,
+    get_cost_by_transport,
     update_travel,
     delete_travel,
     delete_travels_by_user
 )
+from backend.entities.models.PassesModel import Pass
 
 travels_bp = Blueprint('travels', __name__)
 
@@ -151,18 +156,49 @@ def get_travels_by_transport_type_route(transport_type):
 
 @travels_bp.route('/api/travels/user/<int:user_id>/stats', methods=['GET'])
 def get_user_travel_stats(user_id):
-    """Get travel statistics for a user"""
+    """
+    Get comprehensive travel statistics for a user.
+    
+    Returns:
+        Statistics including:
+        - Total and per-transport distances
+        - CO2 emissions (total and by transport)
+        - Costs (total and by transport, including pass info)
+    """
     try:
+        # Get total statistics
         total_distance = get_total_distance_by_user(user_id)
         total_co2 = get_total_co2_by_user(user_id)
+        total_cost = get_total_cost_by_user(user_id)
         travel_count = count_travels_by_user(user_id)
+        
+        # Get statistics by transport type
+        distances_by_transport = get_distance_by_transport(user_id)
+        co2_by_transport = get_co2_by_transport(user_id)
+        cost_by_transport = get_cost_by_transport(user_id)
+        
+        # Get user passes
+        user_passes = list(Pass.select().where(Pass.user_id == user_id))
+        pass_types = [p.type for p in user_passes]
 
         return jsonify({
             'success': True,
-            'stats': {
-                'total_distance': total_distance,
-                'total_co2_emissions': total_co2,
-                'travel_count': travel_count
+            'statistics': {
+                'user_id': user_id,
+                'travel_count': travel_count,
+                'distances': {
+                    'total': total_distance,
+                    'by_transport': distances_by_transport
+                },
+                'pollution': {
+                    'total_co2': total_co2,
+                    'by_transport': co2_by_transport
+                },
+                'costs': {
+                    'total_cost': total_cost,
+                    'by_transport': cost_by_transport,
+                    'passes': pass_types
+                }
             }
         }), 200
 

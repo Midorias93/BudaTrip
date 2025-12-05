@@ -1,5 +1,95 @@
 from backend.entities.models.TravelsModel import Travel
+from backend.entities.models.PassesModel import Pass
 from peewee import DoesNotExist, fn
+
+
+# ==================== ESTIMATION CONSTANTS ====================
+
+# CO2 emission constants (grams per kilometer)
+CO2_EMISSIONS = {
+    'CAR': 180,           # Car produces 180g of CO2 per km
+    'TRANSPORT': 2,       # Public transport produces 2g per km
+    'BUBI': 0,            # Bubi bike-sharing produces 0g of CO2
+    'BIKE': 0,            # Personal bike produces 0g of CO2
+    'WALK': 0             # Walking produces 0g of CO2
+}
+
+# Cost constants (Forint)
+COST_PER_TRAVEL = 250      # 250 Forint per travel for public transport and Bubi (without pass)
+COST_PER_KM_CAR = 250      # 250 Forint per kilometer for car
+
+
+def calculate_travel_cost(user_id, transport_type, distance):
+    """
+    Calculate the cost for a travel based on transport type and user passes.
+    
+    Args:
+        user_id: The ID of the user
+        transport_type: The type of transport
+        distance: Distance in meters
+    
+    Returns:
+        Cost in Forint
+    """
+    if not transport_type or not distance:
+        return 0
+    
+    try:
+        transport_upper = transport_type.upper()
+        
+        # Check what passes the user has
+        user_passes = list(Pass.select().where(Pass.user_id == user_id))
+        pass_types = [p.type for p in user_passes]
+        has_bkk_pass = 'BKK' in pass_types
+        has_bubi_pass = 'BUBI' in pass_types
+        
+        cost = 0
+        
+        if transport_upper == 'CAR':
+            # Car: 250 Forint per kilometer
+            distance_km = distance / 1000.0
+            cost = distance_km * COST_PER_KM_CAR
+        elif transport_upper == 'TRANSPORT':
+            # Public transport: Free with BKK pass, otherwise 250 per travel
+            if not has_bkk_pass:
+                cost = COST_PER_TRAVEL
+        elif transport_upper == 'BUBI':
+            # Bubi bike-sharing: Free with BUBI pass, otherwise 250 per travel
+            if not has_bubi_pass:
+                cost = COST_PER_TRAVEL
+        elif transport_upper in ['BIKE', 'WALK']:
+            # Personal bike and walking are always free
+            cost = 0
+        
+        return cost
+    except Exception as e:
+        print(f"Error calculating travel cost: {e}")
+        return 0
+
+
+def calculate_travel_co2(transport_type, distance):
+    """
+    Calculate the CO2 emissions for a travel based on transport type and distance.
+    
+    Args:
+        transport_type: The type of transport
+        distance: Distance in meters
+    
+    Returns:
+        CO2 emissions in grams
+    """
+    if not transport_type or not distance:
+        return 0
+    
+    try:
+        transport_upper = transport_type.upper()
+        distance_km = distance / 1000.0
+        emission_rate = CO2_EMISSIONS.get(transport_upper, 0)
+        co2_grams = distance_km * emission_rate
+        return co2_grams
+    except Exception as e:
+        print(f"Error calculating CO2 emissions: {e}")
+        return 0
 
 
 # ==================== CREATE OPERATIONS ====================
@@ -12,6 +102,7 @@ def create_travel(user_id, duration=None, distance=None, start_lat=None, start_l
     Args:
         user_id: Required. ID of the user who made the travel.
         Other parameters are optional travel attributes.
+        If cost or co2_emissions are not provided, they will be calculated automatically.
     
     Returns:
         Travel ID if successful, None otherwise.
@@ -19,6 +110,14 @@ def create_travel(user_id, duration=None, distance=None, start_lat=None, start_l
     if user_id is None:
         print("Error: user_id is required")
         return None
+    
+    # Calculate cost if not provided
+    if cost is None and transport_type and distance:
+        cost = calculate_travel_cost(user_id, transport_type, distance)
+    
+    # Calculate CO2 emissions if not provided
+    if co2_emissions is None and transport_type and distance:
+        co2_emissions = calculate_travel_co2(transport_type, distance)
         
     try:
         travel = Travel.create(
@@ -150,6 +249,84 @@ def get_total_co2_by_user(user_id):
     """Get total CO2 emissions by a user"""
     result = Travel.select(fn.SUM(Travel.CO2Emissions)).where(Travel.user_id == user_id).scalar()
     return result if result else 0
+
+
+def get_total_cost_by_user(user_id):
+    """Get total cost by a user"""
+    result = Travel.select(fn.SUM(Travel.cost)).where(Travel.user_id == user_id).scalar()
+    return result if result else 0
+
+
+def get_distance_by_transport(user_id):
+    """
+    Get distance traveled by transport type for a user.
+    
+    Returns:
+        Dictionary with transport types as keys and distances (in meters) as values
+    """
+    try:
+        distances = (Travel
+                    .select(Travel.transportType, fn.SUM(Travel.distance).alias('total_distance'))
+                    .where(Travel.user_id == user_id)
+                    .group_by(Travel.transportType))
+        
+        result = {}
+        for travel in distances:
+            if travel.transportType and travel.total_distance:
+                result[travel.transportType] = float(travel.total_distance)
+        
+        return result
+    except Exception as e:
+        print(f"Error getting distance by transport for user {user_id}: {e}")
+        return {}
+
+
+def get_co2_by_transport(user_id):
+    """
+    Get CO2 emissions by transport type for a user.
+    
+    Returns:
+        Dictionary with transport types as keys and CO2 emissions (in grams) as values
+    """
+    try:
+        co2_data = (Travel
+                   .select(Travel.transportType, fn.SUM(Travel.CO2Emissions).alias('total_co2'))
+                   .where(Travel.user_id == user_id)
+                   .group_by(Travel.transportType))
+        
+        result = {}
+        for travel in co2_data:
+            if travel.transportType and travel.total_co2:
+                result[travel.transportType] = float(travel.total_co2)
+        
+        return result
+    except Exception as e:
+        print(f"Error getting CO2 by transport for user {user_id}: {e}")
+        return {}
+
+
+def get_cost_by_transport(user_id):
+    """
+    Get cost by transport type for a user.
+    
+    Returns:
+        Dictionary with transport types as keys and costs (in Forint) as values
+    """
+    try:
+        cost_data = (Travel
+                    .select(Travel.transportType, fn.SUM(Travel.cost).alias('total_cost'))
+                    .where(Travel.user_id == user_id)
+                    .group_by(Travel.transportType))
+        
+        result = {}
+        for travel in cost_data:
+            if travel.transportType and travel.total_cost:
+                result[travel.transportType] = float(travel.total_cost)
+        
+        return result
+    except Exception as e:
+        print(f"Error getting cost by transport for user {user_id}: {e}")
+        return {}
 
 
 # ==================== UPDATE OPERATIONS ====================

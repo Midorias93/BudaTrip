@@ -1,83 +1,17 @@
-from flask import Blueprint, jsonify, request
-from backend.statics.estimation import (
-    get_user_distance_by_transport,
-    get_user_pollution,
-    get_user_cost,
-    get_user_statistics
+from flask import Blueprint, jsonify
+from backend.entities.services.TravelsService import (
+    get_total_distance_by_user,
+    get_total_co2_by_user,
+    get_total_cost_by_user,
+    get_distance_by_transport,
+    get_co2_by_transport,
+    get_cost_by_transport,
+    count_travels_by_user
 )
+from backend.entities.models.PassesModel import Pass
+from backend.entities.models.UserModel import User
 
 estimation_bp = Blueprint('estimation', __name__)
-
-
-@estimation_bp.route('/api/estimation/distance/<int:user_id>', methods=['GET'])
-def get_distance_by_transport(user_id):
-    """
-    Get total distance traveled by a user for each transport type.
-
-    Returns distance in meters for each transport type (CAR, TRANSPORT, BUBI, BIKE, WALK)
-    """
-    try:
-        distances = get_user_distance_by_transport(user_id)
-
-        if distances is not None:
-            return jsonify({
-                'success': True,
-                'user_id': user_id,
-                'distances': distances
-            }), 200
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'Unable to retrieve distance data'
-            }), 404
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-@estimation_bp.route('/api/estimation/pollution/<int:user_id>', methods=['GET'])
-def get_pollution(user_id):
-    """
-    Get CO2 emissions produced by a user's travels.
-
-    Returns total CO2 in grams and breakdown by transport type.
-    CO2 rates: CAR=180g/km, TRANSPORT=2g/km, BUBI/BIKE/WALK=0g/km
-    """
-    try:
-        pollution = get_user_pollution(user_id)
-
-        return jsonify({
-            'success': True,
-            'user_id': user_id,
-            'pollution': pollution
-        }), 200
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-
-@estimation_bp.route('/api/estimation/cost/<int:user_id>', methods=['GET'])
-def get_cost(user_id):
-    """
-    Get total travel costs for a user in Forint.
-
-    Cost rules:
-    - CAR: 250 Forint per kilometer
-    - TRANSPORT: Free with BKK pass, otherwise 250 Forint per travel
-    - BUBI: Free with BUBI pass, otherwise 250 Forint per travel
-    - BIKE/WALK: Always free
-    """
-    try:
-        costs = get_user_cost(user_id)
-
-        return jsonify({
-            'success': True,
-            'user_id': user_id,
-            'costs': costs
-        }), 200
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @estimation_bp.route('/api/estimation/statistics/<int:user_id>', methods=['GET'])
@@ -89,20 +23,53 @@ def get_statistics(user_id):
     - Total and per-transport distances
     - CO2 emissions (total and by transport)
     - Costs (total and by transport, including pass info)
+    
+    This endpoint redirects to the travel stats endpoint logic for consistency.
     """
     try:
-        statistics = get_user_statistics(user_id)
-
-        if statistics:
-            return jsonify({
-                'success': True,
-                'statistics': statistics
-            }), 200
-        else:
+        # Verify user exists
+        user_exists = User.select().where(User.id == user_id).exists()
+        if not user_exists:
             return jsonify({
                 'success': False,
                 'error': 'User not found'
             }), 404
+        
+        # Get total statistics
+        total_distance = get_total_distance_by_user(user_id)
+        total_co2 = get_total_co2_by_user(user_id)
+        total_cost = get_total_cost_by_user(user_id)
+        
+        # Get statistics by transport type
+        distances_by_transport = get_distance_by_transport(user_id)
+        co2_by_transport = get_co2_by_transport(user_id)
+        cost_by_transport = get_cost_by_transport(user_id)
+        
+        # Get user passes
+        user_passes = list(Pass.select().where(Pass.user_id == user_id))
+        pass_types = [p.type for p in user_passes]
+
+        statistics = {
+            'user_id': user_id,
+            'distances': {
+                'total': total_distance,
+                'by_transport': distances_by_transport
+            },
+            'pollution': {
+                'total_co2': total_co2,
+                'by_transport': co2_by_transport
+            },
+            'costs': {
+                'total_cost': total_cost,
+                'by_transport': cost_by_transport,
+                'passes': pass_types
+            }
+        }
+
+        return jsonify({
+            'success': True,
+            'statistics': statistics
+        }), 200
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
