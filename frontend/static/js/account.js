@@ -476,10 +476,10 @@ async function loadUserTravels() {
                             ${data.travels.map(travel => `
                                 <tr>
                                     <td><i class="fas fa-${getTransportIcon(travel.transportType)}"></i> ${capitalizeFirstLetter(travel.transportType || 'N/A')}</td>
-                                    <td>${travel. distance ?  travel.distance. toFixed(2) + ' km' : 'N/A'}</td>
-                                    <td>${travel.duration ? formatDuration(travel. duration) : 'N/A'}</td>
+                                    <td>${travel.distance ? (travel.distance / 1000).toFixed(2) + ' km' : 'N/A'}</td>
+                                    <td>${travel.duration ? formatDuration(travel.duration) : 'N/A'}</td>
                                     <td>${travel.cost ? travel.cost.toFixed(2) + ' HUF' : 'N/A'}</td>
-                                    <td>${travel.CO2Emissions ? travel.CO2Emissions.toFixed(2) + ' kg' : 'N/A'}</td>
+                                    <td>${travel.CO2Emissions ? (travel.CO2Emissions / 1000).toFixed(2) + ' kg' : 'N/A'}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
