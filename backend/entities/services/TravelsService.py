@@ -16,7 +16,7 @@ CO2_EMISSIONS = {
 
 # Cost constants (Forint)
 COST_PER_TRAVEL = 250      # 250 Forint per travel for public transport and Bubi (without pass)
-COST_PER_KM_CAR = 0.70     # 0.70 per kilometer for car
+COST_PER_KM_CAR = 0.70     # 0.70 Forint per kilometer for car
 
 
 def calculate_travel_cost(user_id, transport_type, distance):
@@ -46,7 +46,7 @@ def calculate_travel_cost(user_id, transport_type, distance):
         cost = 0
         
         if transport_upper == 'CAR':
-            # Car: 0.70 per kilometer
+            # Car: 0.70 Forint per kilometer
             distance_km = distance / 1000.0
             cost = distance_km * COST_PER_KM_CAR
         elif transport_upper == 'TRANSPORT':
