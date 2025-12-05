@@ -7,8 +7,8 @@ from peewee import DoesNotExist, fn
 
 # CO2 emission constants (grams per kilometer)
 CO2_EMISSIONS = {
-    'CAR': 180,           # Car produces 180g of CO2 per km
-    'TRANSPORT': 2,       # Public transport produces 2g per km
+    'CAR': 170,           # Car produces 170g of CO2 per km
+    'TRANSPORT': 3,       # Public transport produces 3g per km
     'BUBI': 0,            # Bubi bike-sharing produces 0g of CO2
     'BIKE': 0,            # Personal bike produces 0g of CO2
     'WALK': 0             # Walking produces 0g of CO2
@@ -16,7 +16,7 @@ CO2_EMISSIONS = {
 
 # Cost constants (Forint)
 COST_PER_TRAVEL = 250      # 250 Forint per travel for public transport and Bubi (without pass)
-COST_PER_KM_CAR = 250      # 250 Forint per kilometer for car
+COST_PER_KM_CAR = 0.70     # 0.70 per kilometer for car
 
 
 def calculate_travel_cost(user_id, transport_type, distance):
@@ -46,7 +46,7 @@ def calculate_travel_cost(user_id, transport_type, distance):
         cost = 0
         
         if transport_upper == 'CAR':
-            # Car: 250 Forint per kilometer
+            # Car: 0.70 per kilometer
             distance_km = distance / 1000.0
             cost = distance_km * COST_PER_KM_CAR
         elif transport_upper == 'TRANSPORT':
