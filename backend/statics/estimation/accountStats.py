@@ -154,14 +154,14 @@ def get_user_cost(user_id):
     
     Cost rules:
     - If user has BKK pass: Public transport (BUS, TRAIN, TRAM, SUBWAY) is free
-    - If user has BUBI pass: Bubi bikes are free
-    - Without pass: 250 Forint per travel for public transport and Bubi
-    - Bike (personal): Always free
+    - Without pass: 250 Forint per travel for public transport
+    - Bike: Always free (treated as personal bikes)
     - Walk: Always free
     - Car: 250 Forint per kilometer
     
     Note: The current implementation cannot distinguish between personal bikes and Bubi.
-    All BIKE transport is treated as potentially Bubi and charged unless user has BUBI pass.
+    All BIKE transport is treated as personal bikes (free). Bubi-specific costs should be
+    tracked separately if needed.
     
     Args:
         user_id: The ID of the user
