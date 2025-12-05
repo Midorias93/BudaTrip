@@ -13,3 +13,5 @@ class Itinerary:
     get_bike_route = staticmethod(BikeItinerary.get_route)
     get_bike_route_with_bubi = staticmethod(BikeItinerary.get_route_with_bubi)
     get_car_route = staticmethod(CarItinerary.get_route)
+    get_transport_route = staticmethod(TransportItinerary.get_route)
+    get_transport_route_with_stops = staticmethod(TransportItinerary.get_route_with_nearest_stops)
