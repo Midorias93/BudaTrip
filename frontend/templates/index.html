@@ -69,23 +69,9 @@
             BudaTrip
         </h1>
 
-        <div class="tab-buttons-locomotion">
-            <button class="tab-btn-locomotion active" onclick="switchTabLocomotion('bike')">
-                <i class="fas fa-bicycle"></i> Bike
-            </button>
-            <button class="tab-btn-locomotion" onclick="switchTabLocomotion('bkk')">
-                <i class="fas fa-train"></i> Public Transport
-            </button>
-            <button class="tab-btn-locomotion" onclick="switchTabLocomotion('car')">
-                <i class="fas fa-car"></i> Car
-            </button>
-        </div>
-
-
-       <!-- Bike Section -->
-        <div id="tab-bike" class="tab-content-locomotion active">
-
-            <!-- Buttons -->
+        <!-- Unified Itinerary Interface -->
+        <div class="unified-itinerary">
+            <!-- Tab Buttons for Route/Stations -->
             <div class="tab-buttons">
                 <button class="tab-btn active" onclick="switchTab('route')">
                     <i class="fas fa-route"></i> Itinerary
@@ -95,7 +81,7 @@
                 </button>
             </div>
 
-            <!-- Itinerary -->
+            <!-- Itinerary Tab -->
             <div id="tab-route" class="tab-content active">
                 <div class="input-group">
                     <label><i class="fas fa-play"></i> Start </label>
@@ -107,27 +93,29 @@
                     </div>
                 </div>
 
-
                 <div class="input-group">
                     <label><i class="fas fa-stop"></i> End </label>
                     <input type="text" id="end-address" placeholder="end address">
                 </div>
 
-                <div class="checkbox-group">
-                    <label>
-                        <input type="checkbox" id="use-bubi" checked>
-                        <i class="fas fa-bicycle"></i> Use Bubi stations
-                    </label>
+                <div class="input-group">
+                    <label><i class="fas fa-route"></i> Transport Mode</label>
+                    <select id="transport-mode" class="transport-select">
+                        <option value="bike">🚴 Bike</option>
+                        <option value="bubi">🚲 Bubi (Bike Sharing)</option>
+                        <option value="transport">🚇 Public Transport (BKK)</option>
+                        <option value="car">🚗 Car</option>
+                    </select>
                 </div>
 
-                <button class="btn btn-primary" onclick="calculateRoute()">
-                    <i class="fas fa-route"></i> Calculate Route
+                <button class="btn btn-primary" onclick="calculateAndSaveRoute()">
+                    <i class="fas fa-play-circle"></i> Start
                 </button>
 
                 <div id="route-info" class="info-box" style="display: none;"></div>
             </div>
 
-            <!-- Stations -->
+            <!-- Stations Tab -->
             <div id="tab-stations" class="tab-content">
                 <button class="btn btn-success" onclick="showAllStations()">
                     <i class="fas fa-bicycle"></i> Display all stations
@@ -146,29 +134,6 @@
             </div>
 
             <div class="error-message" id="error-message"></div>
-
-        </div>
-
-        <div id="tab-bkk" class="tab-content-locomotion">
-            <div class="mt-3">
-                <button id="bkk-nearest-btn" class="btn btn-primary">Find the nearest stops</button>
-                <div id="bkk-nearest-result" class="mt-2" style="display:none;">
-                    <div class="card">
-                        <div class="card-body">
-                            <h6 class="card-title mb-1">Nearest stop</h6>
-                            <p class="card-text" id="bkk-nearest-text">Looking...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <div id="tab-car" class="tab-content-locomotion">
-            <div class="info-box">
-                <i class="fas fa-exclamation-circle"></i>
-                <span>Car is not available for the moment.</span>
-            </div>
         </div>
 
     </div>

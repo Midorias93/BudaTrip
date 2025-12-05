@@ -1,16 +1,28 @@
 import { map, startIcon, endIcon, stationIcon } from './init.js';
 import { showLoading, hideLoading, showError } from './ui.js';
 import { clearMarkers, clearRoute, addMarker, setStartMarker, setEndMarker, setRouteLayer } from './markers.js';
+import { checkRainAndShowAlert } from './weather.js';
 
-export async function calculateRoute() {
+// Store the last calculated route data globally for saving
+let lastRouteData = null;
+
+export async function calculateAndSaveRoute() {
     const startInput = document.getElementById('start-address');
     const startAddress = startInput.dataset.coordinates || startInput.value;
     const endAddress = document.getElementById('end-address').value;
-    const useBubi = document.getElementById('use-bubi').checked;
+    const transportMode = document.getElementById('transport-mode').value;
 
     if (!startAddress || !endAddress) {
         showError('Please enter both start and end addresses');
         return;
+    }
+
+    // Check for rain alert if bike or bubi mode
+    if (transportMode === 'bike' || transportMode === 'bubi') {
+        const shouldProceed = await checkRainAndShowAlert();
+        if (shouldProceed === false) {
+            return; // User cancelled due to rain
+        }
     }
 
     showLoading();
@@ -37,10 +49,29 @@ export async function calculateRoute() {
         const endMark = addMarker(endCoords.lat, endCoords.lon, endIcon, '<b>End</b>');
         setEndMarker(endMark);
 
-        if (useBubi) {
-            await calculateRouteWithStations(startCoords, endCoords);
-        } else {
-            await calculateSimpleRoute(startCoords, endCoords);
+        let routeResult;
+        
+        switch(transportMode) {
+            case 'bike':
+                routeResult = await calculateSimpleRoute(startCoords, endCoords, 'bike');
+                break;
+            case 'bubi':
+                routeResult = await calculateRouteWithStations(startCoords, endCoords);
+                break;
+            case 'transport':
+                routeResult = await calculateTransportRoute(startCoords, endCoords);
+                break;
+            case 'car':
+                routeResult = await calculateCarRoute(startCoords, endCoords);
+                break;
+            default:
+                showError('Invalid transport mode');
+                return;
+        }
+
+        if (routeResult) {
+            // Save to database
+            await saveRouteToTravels(startCoords, endCoords, transportMode, routeResult);
         }
 
         const bounds = L.latLngBounds([
@@ -65,7 +96,7 @@ async function geocodeAddress(address) {
     return response.json();
 }
 
-async function calculateSimpleRoute(startCoords, endCoords) {
+async function calculateSimpleRoute(startCoords, endCoords, mode = 'bike') {
     const response = await fetch('/api/route', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -74,15 +105,22 @@ async function calculateSimpleRoute(startCoords, endCoords) {
             start_lon: startCoords.lon,
             end_lat: endCoords.lat,
             end_lon: endCoords.lon,
-            mode: 'bike'
+            mode: mode
         })
     });
 
     const data = await response.json();
     if (data.success) {
-        displaySimpleRoute(data.route);
+        displaySimpleRoute(data.route, mode);
+        return {
+            distance: data.route.distance,
+            duration: data.route.duration,
+            cost: 0,
+            co2: calculateCO2(data.route.distance, mode)
+        };
     } else {
         showError('Unable to calculate the route');
+        return null;
     }
 }
 
@@ -101,16 +139,28 @@ async function calculateRouteWithStations(startCoords, endCoords) {
     const data = await response.json();
     if (data.success) {
         displayRouteWithStations(data);
+        return {
+            distance: data.total_distance,
+            duration: data.total_duration,
+            cost: 0,
+            co2: calculateCO2(data.total_distance, 'bubi')
+        };
     } else {
         showError('Unable to calculate the route');
+        return null;
     }
 }
 
-function displaySimpleRoute(route) {
+function displaySimpleRoute(route, mode = 'bike') {
     const coords = route.coordinates.map(coord => [coord[1], coord[0]]);
 
+    const modeColors = {
+        'bike': '#3498db',
+        'car': '#e74c3c'
+    };
+
     const layer = L.polyline(coords, {
-        color: '#3498db',
+        color: modeColors[mode] || '#3498db',
         weight: 5,
         opacity: 0.7
     }).addTo(map);
@@ -120,9 +170,19 @@ function displaySimpleRoute(route) {
     const distance = (route.distance / 1000).toFixed(2);
     const duration = Math.round(route.duration / 60);
 
+    const modeIcons = {
+        'bike': 'bicycle',
+        'car': 'car'
+    };
+
+    const modeNames = {
+        'bike': 'Bike',
+        'car': 'Car'
+    };
+
     document.getElementById('route-info').style.display = 'block';
     document.getElementById('route-info').innerHTML = `
-        <h3><i class="fas fa-bicycle"></i>Bike itinerary</h3>
+        <h3><i class="fas fa-${modeIcons[mode] || 'bicycle'}"></i> ${modeNames[mode] || 'Bike'} itinerary</h3>
         <p><strong>Distance :</strong> ${distance} km</p>
         <p><strong>Estimate time :</strong> ${duration} minutes</p>
     `;
@@ -181,4 +241,162 @@ function displayRouteWithStations(data) {
         <p><strong>Total distance : </strong> ${distance} km</p>
         <p><strong>Estimate Time : </strong> ${duration} minutes</p>
     `;
+}
+
+async function calculateTransportRoute(startCoords, endCoords) {
+    const response = await fetch('/api/route/transport', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            start_lat: startCoords.lat,
+            start_lon: startCoords.lon,
+            end_lat: endCoords.lat,
+            end_lon: endCoords.lon
+        })
+    });
+
+    const data = await response.json();
+    if (data.success && data.route) {
+        displayTransportRoute(data.route);
+        return {
+            distance: data.route.distance || 0,
+            duration: data.route.duration || 0,
+            cost: data.route.cost || 0,
+            co2: calculateCO2(data.route.distance || 0, 'transport')
+        };
+    } else {
+        showError('Unable to calculate public transport route');
+        return null;
+    }
+}
+
+async function calculateCarRoute(startCoords, endCoords) {
+    const response = await fetch('/api/route/car', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            start_lat: startCoords.lat,
+            start_lon: startCoords.lon,
+            end_lat: endCoords.lat,
+            end_lon: endCoords.lon,
+            mode: 'driving'
+        })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+        displaySimpleRoute(data.route, 'car');
+        return {
+            distance: data.route.distance,
+            duration: data.route.duration,
+            cost: 0,
+            co2: calculateCO2(data.route.distance, 'car')
+        };
+    } else {
+        showError('Unable to calculate car route');
+        return null;
+    }
+}
+
+function displayTransportRoute(route) {
+    document.getElementById('route-info').style.display = 'block';
+    
+    const distance = route.distance ? (route.distance / 1000).toFixed(2) : 'N/A';
+    const duration = route.duration ? Math.round(route.duration / 60) : 'N/A';
+    
+    document.getElementById('route-info').innerHTML = `
+        <h3><i class="fas fa-train"></i> Public Transport itinerary</h3>
+        <p><strong>Distance :</strong> ${distance} km</p>
+        <p><strong>Estimate time :</strong> ${duration} minutes</p>
+        <p class="info-note"><i class="fas fa-info-circle"></i> Detailed public transport route information is available through BKK.</p>
+    `;
+}
+
+function calculateCO2(distance, mode) {
+    // CO2 emissions in kg per km
+    const emissionFactors = {
+        'bike': 0,
+        'bubi': 0,
+        'transport': 0.05, // Public transport average
+        'car': 0.12 // Car average
+    };
+    
+    const distanceKm = distance / 1000;
+    return distanceKm * (emissionFactors[mode] || 0);
+}
+
+async function saveRouteToTravels(startCoords, endCoords, transportMode, routeData) {
+    try {
+        // Check if user is logged in
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            console.log('User not logged in, skipping travel save');
+            return;
+        }
+
+        const user = JSON.parse(userStr);
+        
+        // Get current weather ID if available
+        let weatherId = null;
+        try {
+            const weatherResponse = await fetch('/api/weather/latest');
+            const weatherData = await weatherResponse.json();
+            if (weatherData.success && weatherData.weather && weatherData.weather.id) {
+                weatherId = weatherData.weather.id;
+            }
+        } catch (e) {
+            console.log('Could not fetch weather ID:', e);
+        }
+
+        // Prepare travel data
+        const travelData = {
+            user_id: user.id,
+            duration: routeData.duration,
+            distance: routeData.distance / 1000, // Convert to km
+            start_lat: startCoords.lat,
+            start_lon: startCoords.lon,
+            end_lat: endCoords.lat,
+            end_lon: endCoords.lon,
+            transportType: transportMode,
+            cost: routeData.cost || 0,
+            CO2Emissions: routeData.co2 || 0,
+            weather_id: weatherId,
+            pass_id: null
+        };
+
+        // Save to database
+        const response = await fetch('/api/travels', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(travelData)
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('Travel saved successfully:', result.travel_id);
+            // Show success notification
+            showSuccess('Route calculated and saved to your travel history!');
+        } else {
+            console.error('Failed to save travel:', result.error);
+        }
+    } catch (error) {
+        console.error('Error saving travel:', error);
+    }
+}
+
+function showSuccess(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification success';
+    notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }

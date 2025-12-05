@@ -52,12 +52,16 @@ export async function showAllWeather() {
 }
 
 export function checkRainAndShowAlert() {
-    if (window.currentWeather && window.currentWeather.precipitation > 30) {
-        showRainAlert();
-    }
+    return new Promise((resolve) => {
+        if (window.currentWeather && window.currentWeather.precipitation > 30) {
+            showRainAlert(resolve);
+        } else {
+            resolve(true); // No rain, proceed
+        }
+    });
 }
 
-function showRainAlert() {
+function showRainAlert(resolve) {
     const overlay = document.getElementById('rain-alert-overlay');
     const alert = document.getElementById('rain-alert');
 
@@ -72,6 +76,9 @@ function showRainAlert() {
 
     overlay.classList.add('show');
     alert.classList.add('show');
+    
+    // Store resolve function for button handlers
+    window.rainAlertResolve = resolve;
 }
 
 export function closeRainAlert() {
@@ -80,27 +87,33 @@ export function closeRainAlert() {
 
     overlay.classList.remove('show');
     alert.classList.remove('show');
+    
+    // Resolve with true (continue anyway)
+    if (window.rainAlertResolve) {
+        window.rainAlertResolve(true);
+        window.rainAlertResolve = null;
+    }
 }
 
 export function switchToBKK() {
     closeRainAlert();
-
-    document.querySelectorAll('.tab-btn-locomotion').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.textContent.includes('BKK') || btn.onclick.toString().includes('bkk')) {
-            btn.classList.add('active');
-        }
-    });
-
-    document.querySelectorAll('.tab-content-locomotion').forEach(content => {
-        content.classList.remove('active');
-    });
-    document.getElementById('tab-bkk').classList.add('active');
+    
+    // Switch transport mode to BKK
+    const transportMode = document.getElementById('transport-mode');
+    if (transportMode) {
+        transportMode.value = 'transport';
+    }
 
     clearMarkers();
     clearRoute();
 
     showSearchNotification('Switched to public transport (BKK)', 'success');
+    
+    // Resolve with false (don't continue with bike/bubi)
+    if (window.rainAlertResolve) {
+        window.rainAlertResolve(false);
+        window.rainAlertResolve = null;
+    }
 }
 
 export function initWeather() {
