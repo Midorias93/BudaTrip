@@ -8,6 +8,7 @@ window.addEventListener('DOMContentLoaded', () => {
     loadUserPasses();
     loadUserTravels();
     loadUserEstimation();  // Add this line
+    loadAccountStats();    // Add this line for summary stats
 });
 
 // ============================================
@@ -513,7 +514,7 @@ async function loadUserEstimation() {
         const user = JSON.parse(localStorage. getItem('user'));
         if (!user) return;
 
-        const response = await fetch(`/api/estimation/statistics/${user.id}`);
+        const response = await fetch(`/api/travels/user/${user.id}/stats`);
         const data = await response.json();
 
         const estimationStats = document. getElementById('estimation-stats');
@@ -640,6 +641,52 @@ async function loadUserEstimation() {
                 <p>Failed to load statistics</p>
             </div>
         `;
+    }
+}
+
+// ============================================
+// ACCOUNT SUMMARY STATISTICS
+// ============================================
+
+async function loadAccountStats() {
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) return;
+
+        const response = await fetch(`/api/travels/user/${user.id}/stats`);
+        const data = await response.json();
+
+        if (data.success && data.statistics) {
+            const stats = data.statistics;
+            
+            // Update total travels
+            document.getElementById('stat-travels').textContent = stats.travel_count || 0;
+            
+            // Update total distance
+            const totalDistanceKm = stats.distances.total ? (stats.distances.total / 1000).toFixed(2) : 0;
+            document.getElementById('stat-distance').textContent = `${totalDistanceKm} km`;
+            
+            // Update total CO2
+            const totalCO2Kg = stats.pollution.total_co2 ? (stats.pollution.total_co2 / 1000).toFixed(2) : 0;
+            document.getElementById('stat-co2').textContent = `${totalCO2Kg} kg`;
+            
+            // Update total cost
+            const totalCost = stats.costs.total_cost ? stats.costs.total_cost.toFixed(2) : 0;
+            document.getElementById('stat-cost').textContent = `${totalCost} HUF`;
+        } else {
+            // Set default values if no data
+            document.getElementById('stat-travels').textContent = '0';
+            document.getElementById('stat-distance').textContent = '0 km';
+            document.getElementById('stat-co2').textContent = '0 kg';
+            document.getElementById('stat-cost').textContent = '0 HUF';
+        }
+    } catch (error) {
+        console.error('Error loading account stats:', error);
+        // Set default values on error
+        document.getElementById('stat-travels').textContent = '0';
+        document.getElementById('stat-distance').textContent = '0 km';
+        document.getElementById('stat-co2').textContent = '0 kg';
+        document.getElementById('stat-cost').textContent = '0 HUF';
     }
 }
 
