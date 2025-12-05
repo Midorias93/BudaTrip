@@ -3,6 +3,9 @@ import { clearMarkers, clearRoute } from './markers.js';
 
 window.currentWeather = null;
 
+// Store the rain alert resolve function at module level
+let rainAlertResolveCallback = null;
+
 export async function fetchAndSaveWeather() {
     try {
         const response = await fetch('/api/weather/current');
@@ -77,8 +80,8 @@ function showRainAlert(resolve) {
     overlay.classList.add('show');
     alert.classList.add('show');
     
-    // Store resolve function for button handlers
-    window.rainAlertResolve = resolve;
+    // Store resolve function at module level
+    rainAlertResolveCallback = resolve;
 }
 
 export function closeRainAlert() {
@@ -89,9 +92,9 @@ export function closeRainAlert() {
     alert.classList.remove('show');
     
     // Resolve with true (continue anyway)
-    if (window.rainAlertResolve) {
-        window.rainAlertResolve(true);
-        window.rainAlertResolve = null;
+    if (rainAlertResolveCallback) {
+        rainAlertResolveCallback(true);
+        rainAlertResolveCallback = null;
     }
 }
 
@@ -110,9 +113,9 @@ export function switchToBKK() {
     showSearchNotification('Switched to public transport (BKK)', 'success');
     
     // Resolve with false (don't continue with bike/bubi)
-    if (window.rainAlertResolve) {
-        window.rainAlertResolve(false);
-        window.rainAlertResolve = null;
+    if (rainAlertResolveCallback) {
+        rainAlertResolveCallback(false);
+        rainAlertResolveCallback = null;
     }
 }
 

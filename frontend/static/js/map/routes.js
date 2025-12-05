@@ -3,9 +3,6 @@ import { showLoading, hideLoading, showError } from './ui.js';
 import { clearMarkers, clearRoute, addMarker, setStartMarker, setEndMarker, setRouteLayer } from './markers.js';
 import { checkRainAndShowAlert } from './weather.js';
 
-// Store the last calculated route data globally for saving
-let lastRouteData = null;
-
 export async function calculateAndSaveRoute() {
     const startInput = document.getElementById('start-address');
     const startAddress = startInput.dataset.coordinates || startInput.value;
@@ -314,11 +311,15 @@ function displayTransportRoute(route) {
 
 function calculateCO2(distance, mode) {
     // CO2 emissions in kg per km
+    // Source: Average emissions based on transport mode
+    // Bike/Bubi: 0 kg (zero emissions)
+    // Public transport: 0.05 kg/km (average for buses/trains)
+    // Car: 0.12 kg/km (average for gasoline car)
     const emissionFactors = {
         'bike': 0,
         'bubi': 0,
-        'transport': 0.05, // Public transport average
-        'car': 0.12 // Car average
+        'transport': 0.05,
+        'car': 0.12
     };
     
     const distanceKm = distance / 1000;
@@ -334,7 +335,13 @@ async function saveRouteToTravels(startCoords, endCoords, transportMode, routeDa
             return;
         }
 
-        const user = JSON.parse(userStr);
+        let user;
+        try {
+            user = JSON.parse(userStr);
+        } catch (parseError) {
+            console.error('Invalid user data in localStorage:', parseError);
+            return;
+        }
         
         // Get current weather ID if available
         let weatherId = null;
@@ -379,9 +386,11 @@ async function saveRouteToTravels(startCoords, endCoords, transportMode, routeDa
             showSuccess('Route calculated and saved to your travel history!');
         } else {
             console.error('Failed to save travel:', result.error);
+            showError('Route calculated but could not be saved to history');
         }
     } catch (error) {
         console.error('Error saving travel:', error);
+        showError('Route calculated but could not be saved to history');
     }
 }
 
