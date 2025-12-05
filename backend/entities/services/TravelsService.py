@@ -16,7 +16,7 @@ CO2_EMISSIONS = {
 
 # Cost constants (Forint)
 COST_PER_TRAVEL = 250      # 250 Forint per travel for public transport and Bubi (without pass)
-COST_PER_KM_CAR = 0.70     # 0.70 Forint per kilometer for car
+COST_PER_KM_CAR = 50  # 0.70 Forint per kilometer for car
 
 
 def calculate_travel_cost(user_id, transport_type, distance):
@@ -47,7 +47,7 @@ def calculate_travel_cost(user_id, transport_type, distance):
         
         if transport_upper == 'CAR':
             # Car: 0.70 Forint per kilometer
-            distance_km = distance / 1000.0
+            distance_km = distance
             cost = distance_km * COST_PER_KM_CAR
         elif transport_upper == 'TRANSPORT':
             # Public transport: Free with BKK pass, otherwise 250 per travel
@@ -83,7 +83,7 @@ def calculate_travel_co2(transport_type, distance):
     
     try:
         transport_upper = transport_type.upper()
-        distance_km = distance / 1000.0
+        distance_km = distance
         emission_rate = CO2_EMISSIONS.get(transport_upper, 0)
         co2_grams = distance_km * emission_rate
         return co2_grams
@@ -112,9 +112,8 @@ def create_travel(user_id, duration=None, distance=None, start_lat=None, start_l
         return None
     
     # Calculate cost if not provided
-    if cost is None and transport_type and distance:
+    if cost == 0 and transport_type and distance:
         cost = calculate_travel_cost(user_id, transport_type, distance)
-    
     # Calculate CO2 emissions if not provided
     if co2_emissions is None and transport_type and distance:
         co2_emissions = calculate_travel_co2(transport_type, distance)

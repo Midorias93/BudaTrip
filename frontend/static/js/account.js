@@ -476,10 +476,10 @@ async function loadUserTravels() {
                             ${data.travels.map(travel => `
                                 <tr>
                                     <td><i class="fas fa-${getTransportIcon(travel.transportType)}"></i> ${capitalizeFirstLetter(travel.transportType || 'N/A')}</td>
-                                    <td>${travel.distance ? (travel.distance / 1000).toFixed(2) + ' km' : 'N/A'}</td>
+                                    <td>${travel.distance ? (travel.distance / 1).toFixed(2) + ' km' : 'N/A'}</td>
                                     <td>${travel.duration ? formatDuration(travel.duration) : 'N/A'}</td>
                                     <td>${travel.cost ? travel.cost.toFixed(2) + ' HUF' : 'N/A'}</td>
-                                    <td>${travel.CO2Emissions ? (travel.CO2Emissions / 1000).toFixed(2) + ' kg' : 'N/A'}</td>
+                                    <td>${travel.CO2Emissions ? (travel.CO2Emissions / 1).toFixed(2) + ' kg' : 'N/A'}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -521,9 +521,9 @@ async function loadUserEstimation() {
 
         if (data.success && data.statistics) {
             const stats = data.statistics;
-            const totalDistanceKm = (stats.distances. total / 1000). toFixed(2);
-            const totalCO2Kg = (stats.pollution.total_co2 / 1000). toFixed(2);
-            const totalCost = stats.costs.total_cost.toFixed(2);
+            const totalDistanceKm = (stats.distances. total / 1). toFixed(2);
+            const totalCO2Kg = (stats.pollution.total_co2 / 1). toFixed(2);
+            const totalCost = (stats.costs.total_cost / 1).toFixed(2);
             const passes = stats.costs.passes;
 
             // Build distance by transport HTML
@@ -533,7 +533,7 @@ async function loadUserEstimation() {
                     <div class="stat-detail-item">
                         <i class="fas fa-${getTransportIcon(type)}"></i>
                         <span>${capitalizeFirstLetter(type)}</span>
-                        <strong>${(distance / 1000).toFixed(2)} km</strong>
+                        <strong>${(distance / 1).toFixed(2)} km</strong>
                     </div>
                 `;
             }
@@ -545,7 +545,7 @@ async function loadUserEstimation() {
                     <div class="stat-detail-item">
                         <i class="fas fa-${getTransportIcon(type)}"></i>
                         <span>${capitalizeFirstLetter(type)}</span>
-                        <strong>${(co2 / 1000).toFixed(2)} kg</strong>
+                        <strong>${(co2 / 1).toFixed(2)} kg</strong>
                     </div>
                 `;
             }
@@ -663,15 +663,15 @@ async function loadAccountStats() {
             document.getElementById('stat-travels').textContent = stats.travel_count || 0;
             
             // Update total distance
-            const totalDistanceKm = stats.distances.total ? (stats.distances.total / 1000).toFixed(2) : 0;
+            const totalDistanceKm = stats.distances.total ? (stats.distances.total / 1).toFixed(2) : 0;
             document.getElementById('stat-distance').textContent = `${totalDistanceKm} km`;
             
             // Update total CO2
-            const totalCO2Kg = stats.pollution.total_co2 ? (stats.pollution.total_co2 / 1000).toFixed(2) : 0;
+            const totalCO2Kg = stats.pollution.total_co2 ? (stats.pollution.total_co2 / 1).toFixed(2) : 0;
             document.getElementById('stat-co2').textContent = `${totalCO2Kg} kg`;
             
             // Update total cost
-            const totalCost = stats.costs.total_cost ? stats.costs.total_cost.toFixed(2) : 0;
+            const totalCost = stats.costs.total_cost ? (stats.costs.total_cost / 1).toFixed(2) : 0;
             document.getElementById('stat-cost').textContent = `${totalCost} HUF`;
         } else {
             // Set default values if no data

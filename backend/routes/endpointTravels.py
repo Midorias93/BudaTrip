@@ -176,7 +176,7 @@ def get_user_travel_stats(user_id):
         distances_by_transport = get_distance_by_transport(user_id)
         co2_by_transport = get_co2_by_transport(user_id)
         cost_by_transport = get_cost_by_transport(user_id)
-        
+
         # Get user passes
         user_passes = list(Pass.select().where(Pass.user_id == user_id))
         pass_types = [p.type for p in user_passes]
