@@ -7,6 +7,7 @@ window.addEventListener('DOMContentLoaded', () => {
     loadUserData();
     loadUserPasses();
     loadUserTravels();
+    loadUserEstimation();  // Add this line
 });
 
 // ============================================
@@ -16,7 +17,7 @@ window.addEventListener('DOMContentLoaded', () => {
 function checkAuth() {
     const user = localStorage.getItem('user');
 
-    if (!user) {
+    if (! user) {
         window.location.href = '/login';
         return;
     }
@@ -28,19 +29,19 @@ function checkAuth() {
 
 function formatFrenchPhone(raw) {
     if (!raw) return '';
-    let digits = String(raw).replace(/\D/g, ''); // keep only digits
-    if (digits.startsWith('33')) digits = digits.slice(2); // remove FR country code if present
-    if (digits.startsWith('0')) digits = digits.slice(1); // remove national 0
-    digits = digits.slice(0, 9); // keep at most 9 digits (national format without 0)
+    let digits = String(raw).replace(/\D/g, '');
+    if (digits.startsWith('33')) digits = digits.slice(2);
+    if (digits.startsWith('0')) digits = digits. slice(1);
+    digits = digits.slice(0, 9);
 
     const parts = [];
-    if (digits.length > 0) parts.push(digits.slice(0, 1));
+    if (digits.length > 0) parts. push(digits. slice(0, 1));
     if (digits.length > 1) parts.push(digits.slice(1, 3));
     if (digits.length > 3) parts.push(digits.slice(3, 5));
-    if (digits.length > 5) parts.push(digits.slice(5, 7));
-    if (digits.length > 7) parts.push(digits.slice(7, 9));
+    if (digits. length > 5) parts.push(digits.slice(5, 7));
+    if (digits.length > 7) parts.push(digits. slice(7, 9));
 
-    return parts.length ? '+33 ' + parts.join(' ') : '';
+    return parts.length ?  '+33 ' + parts.join(' ') : '';
 }
 
 function loadUserData() {
@@ -51,15 +52,13 @@ function loadUserData() {
     const userData = JSON.parse(user);
 
     document.getElementById('sidebar-name').textContent = userData.name || 'User';
-    document.getElementById('sidebar-email').textContent = userData.email;
+    document. getElementById('sidebar-email').textContent = userData.email;
 
-    document.getElementById('name').value = userData.name || '';
+    document.getElementById('name').value = userData. name || '';
     document.getElementById('email-profile').value = userData.email;
     phone = userData.phone || '';
     phone = formatFrenchPhone(phone);
     document.getElementById('phone').value = phone;
-
-
 }
 
 // ============================================
@@ -75,9 +74,9 @@ function showSection(sectionName) {
         section.classList.remove('active');
     });
 
-    event.target.closest('.nav-item').classList.add('active');
+    event.target.closest('.nav-item').classList. add('active');
 
-    document.getElementById(`section-${sectionName}`).classList.add('active');
+    document.getElementById(`section-${sectionName}`).classList. add('active');
 }
 
 // ============================================
@@ -85,8 +84,8 @@ function showSection(sectionName) {
 // ============================================
 
 function togglePasswordField(inputId) {
-    const input = document.getElementById(inputId);
-    const button = input.parentElement.querySelector('.toggle-password');
+    const input = document. getElementById(inputId);
+    const button = input.parentElement. querySelector('.toggle-password');
     const icon = button.querySelector('i');
 
     if (input.type === 'password') {
@@ -109,7 +108,7 @@ async function updateProfile(event) {
 
     const name = document.getElementById('name').value;
     const email = document.getElementById('email-profile').value;
-    const phone = document.getElementById('phone').value;
+    const phone = document.getElementById('phone'). value;
 
     if (!name) {
         showToast('Please enter your name', 'error');
@@ -119,7 +118,7 @@ async function updateProfile(event) {
     showLoading();
 
     try {
-        const user = JSON.parse(localStorage.getItem('user'));
+        const user = JSON.parse(localStorage. getItem('user'));
 
         const response = await fetch(`/api/users/${user.id}`, {
             method: 'PUT',
@@ -133,16 +132,15 @@ async function updateProfile(event) {
             })
         });
 
-        const data = await response.json();
+        const data = await response. json();
 
-        if (!data.success) {
+        if (! data.success) {
             showToast(data.error || 'Failed to update profile', 'error');
             return;
         }
 
-
         const updatedUser = {
-            ...user,
+            ... user,
             name: name,
             email: email,
             phone: phone
@@ -169,12 +167,11 @@ async function updateProfile(event) {
 async function updatePassword(event) {
     event.preventDefault();
 
-    const currentPassword = document.getElementById('current-password').value;
-    const newPassword = document.getElementById('new-password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
+    const currentPassword = document.getElementById('current-password'). value;
+    const newPassword = document.getElementById('new-password'). value;
+    const confirmPassword = document. getElementById('confirm-password').value;
 
-    // Validation
-    if (!currentPassword || !newPassword || !confirmPassword) {
+    if (!currentPassword || !newPassword || ! confirmPassword) {
         showToast('Please fill in all password fields', 'error');
         return;
     }
@@ -203,14 +200,14 @@ async function updatePassword(event) {
         const data = await response.json();
 
         if (data.success) {
-            showToast('Password updated successfully!', 'success');
+            showToast('Password updated successfully! ', 'success');
             document.getElementById('password-form').reset();
         } else {
             showToast(data.error || 'Failed to update password', 'error');
         }
 
     } catch (error) {
-        showToast('An error occurred. Please try again.', 'error');
+        showToast('An error occurred.  Please try again.', 'error');
         console.error('Password update error:', error);
     } finally {
         hideLoading();
@@ -243,7 +240,6 @@ async function deleteAccount() {
     try {
         const user = JSON.parse(localStorage.getItem('user'));
 
-        // Simulate API call
         const response = await fetch(`/api/users/${user.id}`, {
             method: 'DELETE'
         });
@@ -252,13 +248,13 @@ async function deleteAccount() {
 
         if (data.success) {
             localStorage.removeItem('user');
-            showToast('Account deleted successfully. Redirecting...', 'success');
+            showToast('Account deleted successfully.  Redirecting... ', 'success');
 
             setTimeout(() => {
                 window.location.href = '/';
             }, 2000);
         } else {
-            showToast(data.error || 'Failed to delete account', 'error');
+            showToast(data. error || 'Failed to delete account', 'error');
         }
 
     } catch (error) {
@@ -295,13 +291,12 @@ function showLoading() {
 }
 
 function hideLoading() {
-    document.getElementById('loading-overlay').classList.remove('show');
+    document.getElementById('loading-overlay'). classList.remove('show');
 }
 
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
 
-    // Set icon based on type
     const icon = type === 'success'
         ? '<i class="fas fa-check-circle"></i>'
         : '<i class="fas fa-exclamation-circle"></i>';
@@ -328,7 +323,7 @@ async function loadUserPasses() {
 
         const passesList = document.getElementById('passes-list');
 
-        if (data.success && data.passes && data.passes.length > 0) {
+        if (data. success && data.passes && data.passes.length > 0) {
             passesList.innerHTML = `
                 <div class="table-responsive">
                     <table class="data-table">
@@ -342,7 +337,7 @@ async function loadUserPasses() {
                         <tbody>
                             ${data.passes.map(pass => `
                                 <tr>
-                                    <td><i class="fas fa-ticket-alt"></i> ${capitalizeFirstLetter(pass.type)}</td>
+                                    <td><i class="fas fa-ticket-alt"></i> ${capitalizeFirstLetter(pass. type)}</td>
                                     <td>${pass.price} HUF</td>
                                     <td>
                                         <button class="btn-icon btn-danger" onclick="deletePass(${pass.id})" title="Delete">
@@ -350,16 +345,16 @@ async function loadUserPasses() {
                                         </button>
                                     </td>
                                 </tr>
-                            `).join('')}
+                            `). join('')}
                         </tbody>
                     </table>
                 </div>
             `;
         } else {
-            passesList.innerHTML = `
+            passesList. innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-ticket-alt"></i>
-                    <p>No passes found. Add your first pass using the form above!</p>
+                    <p>No passes found.  Add your first pass using the form above! </p>
                 </div>
             `;
         }
@@ -375,10 +370,10 @@ async function loadUserPasses() {
 }
 
 async function addNewPass(event) {
-    event.preventDefault();
+    event. preventDefault();
 
-    const passType = document.getElementById('pass-type').value;
-    const passPrice = document.getElementById('pass-price').value;
+    const passType = document.getElementById('pass-type'). value;
+    const passPrice = document.getElementById('pass-price'). value;
 
     if (!passType || !passPrice) {
         showToast('Please fill in all fields', 'error');
@@ -398,11 +393,11 @@ async function addNewPass(event) {
             body: JSON.stringify({
                 type: passType,
                 price: parseFloat(passPrice),
-                user_id: user.id
+                user_id: user. id
             })
         });
 
-        const data = await response.json();
+        const data = await response. json();
 
         if (data.success) {
             showToast('Pass added successfully!', 'success');
@@ -414,16 +409,16 @@ async function addNewPass(event) {
 
     } catch (error) {
         showToast('An error occurred. Please try again.', 'error');
-        console.error('Add pass error:', error);
+        console. error('Add pass error:', error);
     } finally {
         hideLoading();
     }
 }
 
 async function deletePass(passId) {
-    const confirmed = confirm('Are you sure you want to delete this pass?');
+    const confirmed = confirm('Are you sure you want to delete this pass? ');
 
-    if (!confirmed) return;
+    if (! confirmed) return;
 
     showLoading();
 
@@ -461,9 +456,9 @@ async function loadUserTravels() {
         const response = await fetch(`/api/travels/user/${user.id}`);
         const data = await response.json();
 
-        const travelsList = document.getElementById('travels-list');
+        const travelsList = document. getElementById('travels-list');
 
-        if (data.success && data.travels && data.travels.length > 0) {
+        if (data.success && data.travels && data. travels.length > 0) {
             travelsList.innerHTML = `
                 <div class="table-responsive">
                     <table class="data-table">
@@ -480,8 +475,8 @@ async function loadUserTravels() {
                             ${data.travels.map(travel => `
                                 <tr>
                                     <td><i class="fas fa-${getTransportIcon(travel.transportType)}"></i> ${capitalizeFirstLetter(travel.transportType || 'N/A')}</td>
-                                    <td>${travel.distance ? travel.distance.toFixed(2) + ' km' : 'N/A'}</td>
-                                    <td>${travel.duration ? formatDuration(travel.duration) : 'N/A'}</td>
+                                    <td>${travel. distance ?  travel.distance. toFixed(2) + ' km' : 'N/A'}</td>
+                                    <td>${travel.duration ? formatDuration(travel. duration) : 'N/A'}</td>
                                     <td>${travel.cost ? travel.cost.toFixed(2) + ' HUF' : 'N/A'}</td>
                                     <td>${travel.CO2Emissions ? travel.CO2Emissions.toFixed(2) + ' kg' : 'N/A'}</td>
                                 </tr>
@@ -500,10 +495,149 @@ async function loadUserTravels() {
         }
     } catch (error) {
         console.error('Error loading travels:', error);
-        document.getElementById('travels-list').innerHTML = `
+        document.getElementById('travels-list'). innerHTML = `
             <div class="error-state">
                 <i class="fas fa-exclamation-circle"></i>
                 <p>Failed to load travel history</p>
+            </div>
+        `;
+    }
+}
+
+// ============================================
+// ESTIMATION STATISTICS
+// ============================================
+
+async function loadUserEstimation() {
+    try {
+        const user = JSON.parse(localStorage. getItem('user'));
+        if (!user) return;
+
+        const response = await fetch(`/api/estimation/statistics/${user.id}`);
+        const data = await response.json();
+
+        const estimationStats = document. getElementById('estimation-stats');
+
+        if (data.success && data.statistics) {
+            const stats = data.statistics;
+            const totalDistanceKm = (stats.distances. total / 1000). toFixed(2);
+            const totalCO2Kg = (stats.pollution.total_co2 / 1000). toFixed(2);
+            const totalCost = stats.costs.total_cost.toFixed(2);
+            const passes = stats.costs.passes;
+
+            // Build distance by transport HTML
+            let distanceByTransportHtml = '';
+            for (const [type, distance] of Object.entries(stats. distances.by_transport)) {
+                distanceByTransportHtml += `
+                    <div class="stat-detail-item">
+                        <i class="fas fa-${getTransportIcon(type)}"></i>
+                        <span>${capitalizeFirstLetter(type)}</span>
+                        <strong>${(distance / 1000).toFixed(2)} km</strong>
+                    </div>
+                `;
+            }
+
+            // Build CO2 by transport HTML
+            let co2ByTransportHtml = '';
+            for (const [type, co2] of Object.entries(stats.pollution. by_transport)) {
+                co2ByTransportHtml += `
+                    <div class="stat-detail-item">
+                        <i class="fas fa-${getTransportIcon(type)}"></i>
+                        <span>${capitalizeFirstLetter(type)}</span>
+                        <strong>${(co2 / 1000).toFixed(2)} kg</strong>
+                    </div>
+                `;
+            }
+
+            // Build cost by transport HTML
+            let costByTransportHtml = '';
+            for (const [type, cost] of Object.entries(stats. costs.by_transport)) {
+                costByTransportHtml += `
+                    <div class="stat-detail-item">
+                        <i class="fas fa-${getTransportIcon(type)}"></i>
+                        <span>${capitalizeFirstLetter(type)}</span>
+                        <strong>${cost.toFixed(2)} HUF</strong>
+                    </div>
+                `;
+            }
+
+            // Build passes HTML
+            let passesHtml = passes. length > 0
+                ? passes.map(p => `<span class="pass-badge">${p}</span>`).join(' ')
+                : '<span class="no-pass">No active passes</span>';
+
+            estimationStats. innerHTML = `
+                <div class="estimation-grid">
+                    <!-- Total Distance Card -->
+                    <div class="estimation-card">
+                        <div class="estimation-header">
+                            <div class="estimation-icon distance">
+                                <i class="fas fa-road"></i>
+                            </div>
+                            <div class="estimation-title">
+                                <h4>Total Distance</h4>
+                                <p class="estimation-value">${totalDistanceKm} km</p>
+                            </div>
+                        </div>
+                        <div class="estimation-details">
+                            <h5>By Transport Type:</h5>
+                            ${distanceByTransportHtml || '<p class="no-data">No data available</p>'}
+                        </div>
+                    </div>
+
+                    <!-- CO2 Emissions Card -->
+                    <div class="estimation-card">
+                        <div class="estimation-header">
+                            <div class="estimation-icon pollution">
+                                <i class="fas fa-smog"></i>
+                            </div>
+                            <div class="estimation-title">
+                                <h4>CO₂ Emissions</h4>
+                                <p class="estimation-value">${totalCO2Kg} kg</p>
+                            </div>
+                        </div>
+                        <div class="estimation-details">
+                            <h5>By Transport Type:</h5>
+                            ${co2ByTransportHtml || '<p class="no-data">No data available</p>'}
+                        </div>
+                    </div>
+
+                    <!-- Total Cost Card -->
+                    <div class="estimation-card">
+                        <div class="estimation-header">
+                            <div class="estimation-icon cost">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="estimation-title">
+                                <h4>Total Cost</h4>
+                                <p class="estimation-value">${totalCost} HUF</p>
+                            </div>
+                        </div>
+                        <div class="estimation-details">
+                            <h5>By Transport Type:</h5>
+                            ${costByTransportHtml || '<p class="no-data">No data available</p>'}
+                            <div class="passes-section">
+                                <h5>Your Passes:</h5>
+                                <div class="passes-list">${passesHtml}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            estimationStats.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-chart-bar"></i>
+                    <p>No statistics available yet. Start traveling to see your stats!</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading estimation:', error);
+        document.getElementById('estimation-stats').innerHTML = `
+            <div class="error-state">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Failed to load statistics</p>
             </div>
         `;
     }
@@ -515,7 +649,7 @@ async function loadUserTravels() {
 
 function capitalizeFirstLetter(string) {
     if (!string) return '';
-    return string.charAt(0).toUpperCase() + string.slice(1);
+    return string. charAt(0).toUpperCase() + string.slice(1);
 }
 
 function formatDuration(seconds) {
@@ -523,7 +657,7 @@ function formatDuration(seconds) {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
         return `${hours}h ${minutes}m`;
     } else if (minutes > 0) {
@@ -537,11 +671,13 @@ function getTransportIcon(transportType) {
     const icons = {
         'bike': 'bicycle',
         'bicycle': 'bicycle',
+        'bubi': 'bicycle',
         'car': 'car',
         'bus': 'bus',
         'train': 'train',
+        'transport': 'bus',
         'walking': 'walking',
         'walk': 'walking'
     };
-    return icons[transportType?.toLowerCase()] || 'route';
+    return icons[transportType?. toLowerCase()] || 'route';
 }

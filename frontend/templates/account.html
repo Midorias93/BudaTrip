@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<! DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -236,7 +236,7 @@
                         <i class="fas fa-exclamation-triangle"></i> Danger Zone
                     </h3>
                     <p class="danger-text">
-                        Once you delete your account, there is no going back. Please be certain.
+                        Once you delete your account, there is no going back.  Please be certain.
                     </p>
                     <button class="btn btn-danger" onclick="deleteAccount()">
                         <i class="fas fa-trash-alt"></i> Delete My Account
@@ -312,12 +312,23 @@
                     <p>View your past travels and statistics</p>
                 </div>
 
+                <!-- Travel Statistics Summary -->
+                <div class="content-card">
+                    <h3 class="card-title"><i class="fas fa-chart-bar"></i> Your Travel Statistics</h3>
+                    <div id="estimation-stats">
+                        <div class="loading" style="text-align: center; padding: 20px;">
+                            <div class="spinner"></div>
+                            <p>Loading statistics...</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="content-card">
                     <h3 class="card-title">Your Past Travels</h3>
                     <div id="travels-list">
                         <div class="loading" style="text-align: center; padding: 20px;">
                             <div class="spinner"></div>
-                            <p>Loading travels...</p>
+                            <p>Loading travels... </p>
                         </div>
                     </div>
                 </div>
